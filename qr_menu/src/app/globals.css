@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+  
+  /* إذا كنت تستخدم عناصر input كأزرار */
+  input[type="submit"], input[type="button"] {
+    @apply cursor-pointer;
+  }
+}
