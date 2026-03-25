@@ -13,6 +13,26 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// دالة مساعدة لرفع الصور إلى Cloudinary
+async function uploadToCloudinary(file: File) {
+  if (!file || file.size === 0) return null;
+  
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+
+  const uploadResponse: any = await new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { folder: "restaurant_products", resource_type: "image" },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    ).end(buffer);
+  });
+  return uploadResponse.secure_url;
+}
+
+// 1. إضافة منتج جديد
 export async function createProduct(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "غير مصرح لك" };
@@ -20,33 +40,9 @@ export async function createProduct(formData: FormData) {
   try {
     await dbConnect();
 
-    // 1. معالجة ملف الصورة
     const file = formData.get("image") as File;
-    let imageUrl = "";
+    const imageUrl = await uploadToCloudinary(file);
 
-    // التأكد من وجود ملف وأنه ليس فارغاً
-    if (file && file.size > 0) {
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      // الرفع إلى Cloudinary عبر Stream
-      const uploadResponse: any = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { 
-            folder: "restaurant_products", // اسم المجلد في حسابك
-            resource_type: "image" 
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(buffer);
-      });
-
-      imageUrl = uploadResponse.secure_url;
-    }
-
-    // 2. إنشاء المنتج في قاعدة البيانات
     await Product.create({
       restaurant_id: session.user.id,
       category_id: formData.get("category_id"),
@@ -56,30 +52,82 @@ export async function createProduct(formData: FormData) {
       description_en: formData.get("description_en"),
       price: Number(formData.get("price")),
       sort_order: Number(formData.get("sort_order")) || 0,
-      image: imageUrl, // تخزين رابط الصورة هنا
+      image: imageUrl || "", 
       is_available: true,
     });
 
     revalidatePath("/dashboard/products");
     return { success: true };
   } catch (error: any) {
-    console.error("Error creating product:", error);
-    return { error: "فشل في إضافة المنتج أو رفع الصورة" };
+    console.error("Create Error:", error);
+    return { error: "فشل في إضافة المنتج" };
   }
 }
 
+// 2. تعديل منتج موجود
+export async function updateProduct(id: string, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "غير مصرح لك" };
+
+  try {
+    await dbConnect();
+    const existingProduct = await Product.findOne({ _id: id, restaurant_id: session.user.id });
+    if (!existingProduct) return { error: "المنتج غير موجود" };
+
+    let imageUrl = existingProduct.image;
+    const file = formData.get("image") as File;
+
+    // إذا تم رفع صورة جديدة، نحذف القديمة ونرفع الجديدة
+    if (file && file.size > 0) {
+      if (existingProduct.image) {
+        const oldPublicId = existingProduct.image.split('/').pop()?.split('.')[0];
+        if (oldPublicId) await cloudinary.uploader.destroy(`restaurant_products/${oldPublicId}`);
+      }
+      imageUrl = await uploadToCloudinary(file);
+    }
+
+    await Product.findByIdAndUpdate(id, {
+      category_id: formData.get("category_id"),
+      name_ar: formData.get("name_ar"),
+      name_en: formData.get("name_en"),
+      description_ar: formData.get("description_ar"),
+      description_en: formData.get("description_en"),
+      price: Number(formData.get("price")),
+      sort_order: Number(formData.get("sort_order")) || 0,
+      image: imageUrl,
+      is_available: formData.get("is_available") === "true",
+    });
+
+    revalidatePath("/dashboard/products");
+    return { success: true };
+  } catch (error) {
+    console.error("Update Error:", error);
+    return { error: "فشل في تحديث المنتج" };
+  }
+}
+
+// 3. حذف منتج
 export async function deleteProduct(id: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "غير مصرح لك" };
 
   try {
     await dbConnect();
-    // اختياري: يمكنك هنا أيضاً حذف الصورة من Cloudinary إذا رغبت
-    await Product.findOneAndDelete({ _id: id, restaurant_id: session.user.id });
+    const product = await Product.findOne({ _id: id, restaurant_id: session.user.id });
+    if (!product) return { error: "المنتج غير موجود" };
+
+    // حذف الصورة من كلواديناري لتوفير المساحة
+    if (product.image) {
+      const publicId = product.image.split('/').pop()?.split('.')[0];
+      if (publicId) await cloudinary.uploader.destroy(`restaurant_products/${publicId}`);
+    }
+
+    await Product.deleteOne({ _id: id });
     
     revalidatePath("/dashboard/products");
     return { success: true };
   } catch (error) {
+    console.error("Delete Error:", error);
     return { error: "فشل في حذف المنتج" };
   }
 }

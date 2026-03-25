@@ -10,3 +10,29 @@
     @apply cursor-pointer;
   }
 }
+
+
+
+
+@layer utilities {
+  /* إخفاء شريط التمرير مع بقاء خاصية التمرير تعمل */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* إضافة تنعيم للتمرير عند الضغط على الأقسام */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* تحسين شكل الخطوط العربية */
+body {
+  font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

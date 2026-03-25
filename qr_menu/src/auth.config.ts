@@ -1,13 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
 
 export const authConfig = {
-  providers: [
-    Credentials({
-      // اترك authorize فارغة هنا أو انقل المنطق لاحقاً
-      async authorize() { return null } 
-    })
-  ],
   pages: {
     signIn: "/login",
   },
@@ -18,9 +11,10 @@ export const authConfig = {
       
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false; // سيعيد توجيهه للـ login
+        return false; 
       }
       return true;
     },
   },
+  providers: [], // اتركه فارغاً هنا، سنضيفه في الملف الآخر
 } satisfies NextAuthConfig;
