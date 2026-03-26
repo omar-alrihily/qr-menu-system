@@ -1,6 +1,8 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import dbConnect from "@/lib/dbConnect";
+import { Restaurant } from "@/models/Restaurant";
 import { 
   LayoutDashboard, 
   Utensils, 
@@ -9,11 +11,15 @@ import {
   LogOut, 
   ExternalLink,
   User
-} from "lucide-react"; // تأكد من تثبيت lucide-react
+} from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
+
+  // 1. الاتصال بقاعدة البيانات وجلب بيانات المطعم للحصول على الـ slug
+  await dbConnect();
+  const restaurant = await Restaurant.findOne({ email: session.user?.email }).select("slug").lean();
 
   const menuItems = [
     { name: "الرئيسية", href: "/dashboard", icon: LayoutDashboard },
@@ -25,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans" dir="rtl">
       {/* Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col bg-white border-l border-gray-200">
+      <aside className="hidden md:flex w-72 flex-col bg-white border-l border-gray-200 shadow-sm">
         <div className="p-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
@@ -60,26 +66,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100 flex items-center justify-between px-8">
+        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100 flex items-center justify-between px-8">
           <div className="flex items-center gap-3">
              <div className="bg-gray-100 p-2 rounded-full"><User size={18} className="text-gray-600" /></div>
              <div className="flex flex-col">
-               <span className="text-xs text-gray-400">مرحباً بك</span>
+               <span className="text-xs text-gray-400 font-medium tracking-wide">مرحباً بك</span>
                <span className="text-sm font-bold text-gray-800">{session.user?.name}</span>
              </div>
           </div>
           
-          <Link 
-            href={`/menu/${session.user?.id}`} 
-            target="_blank"
-            className="flex items-center gap-2 text-sm font-semibold bg-gray-900 text-white px-5 py-2.5 rounded-full hover:bg-gray-800 transition-all shadow-md shadow-gray-200"
-          >
-            <span>معاينة المنيو</span>
-            <ExternalLink size={14} />
-          </Link>
+          {/* الرابط المعدل باستخدام الـ slug */}
+          {restaurant?.slug && (
+            <Link 
+              href={`/r/${restaurant.slug}`} 
+              target="_blank"
+              className="flex items-center gap-2 text-sm font-bold bg-orange-600 text-white px-6 py-2.5 rounded-2xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 active:scale-95"
+            >
+              <span>معاينة المنيو</span>
+              <ExternalLink size={14} />
+            </Link>
+          )}
         </header>
 
-        <main className="p-8 max-w-7xl mx-auto w-full">
+        <main className="p-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
           {children}
         </main>
       </div>
