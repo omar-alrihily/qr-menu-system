@@ -25,7 +25,7 @@ export default function AddCategoryModal() {
       {/* زر فتح النافذة */}
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition-all shadow-md font-medium cursor-pointer"
+        className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg transition-all shadow-md font-medium cursor-pointer"
       >
         + إضافة قسم جديد
       </button>

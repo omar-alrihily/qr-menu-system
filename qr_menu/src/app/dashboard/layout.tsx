@@ -10,14 +10,14 @@ import {
   Settings, 
   LogOut, 
   ExternalLink,
-  User
+  User,
+  ChevronLeft
 } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session) redirect("/login");
 
-  // 1. الاتصال بقاعدة البيانات وجلب بيانات المطعم للحصول على الـ slug
   await dbConnect();
   const restaurant = await Restaurant.findOne({ email: session.user?.email }).select("slug").lean();
 
@@ -29,66 +29,82 @@ export default async function DashboardLayout({ children }: { children: React.Re
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-sans" dir="rtl">
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-72 flex-col bg-white border-l border-gray-200 shadow-sm">
-        <div className="p-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-               <Utensils size={24} />
+    <div className="flex min-h-screen bg-[#FDFDFD] font-[tajawal] text-slate-900" dir="rtl">
+      
+      {/* Sidebar - تصميم فاتح، بسيط وأنيق */}
+      <aside className="hidden md:flex w-72 flex-col bg-white border-l border-slate-100 sticky top-0 h-screen shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+        <div className="p-8 mb-4">
+          <div className="flex items-center gap-3 group">
+            <div className="w-11 h-11 bg-slate-900 rounded-2xl rotate-3 flex items-center justify-center text-white shadow-xl shadow-slate-200 group-hover:rotate-0 transition-all duration-500">
+               <Utensils size={22} className="text-emerald-400" />
             </div>
-            <h2 className="text-xl font-black text-gray-800 tracking-tight">لوحة المنيو</h2>
+            <div className="flex flex-col">
+              <h2 className="text-lg font-black text-slate-950 leading-tight">لوحة المنيو</h2>
+              <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-tighter">التحول الرقمي</span>
+            </div>
           </div>
         </div>
         
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-4 space-y-1.5">
           {menuItems.map((item) => (
             <Link 
               key={item.href}
               href={item.href} 
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200 group"
+              className="flex items-center justify-between px-5 py-3.5 text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 rounded-2xl transition-all duration-300 group font-bold text-sm"
             >
-              <item.icon size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="font-medium">{item.name}</span>
+              <div className="flex items-center gap-3">
+                <item.icon size={20} className="group-hover:scale-110 transition-transform opacity-70 group-hover:opacity-100" />
+                <span>{item.name}</span>
+              </div>
+              <ChevronLeft size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
             </Link>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-gray-50">
-          <form action={async () => { "use server"; await signOut(); }}>
-            <button className="flex items-center gap-3 w-full px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium">
-              <LogOut size={20} />
+        <div className="p-6 border-t border-slate-50">
+          <form 
+            action={async () => { 
+              "use server"; 
+              await signOut({ redirectTo: "/" });
+            }}
+          >
+            <button className="flex items-center gap-3 w-full px-5 py-3.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all font-bold text-sm group">
+              <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
               تسجيل الخروج
             </button>
           </form>
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
-        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100 flex items-center justify-between px-8">
-          <div className="flex items-center gap-3">
-             <div className="bg-gray-100 p-2 rounded-full"><User size={18} className="text-gray-600" /></div>
-             <div className="flex flex-col">
-               <span className="text-xs text-gray-400 font-medium tracking-wide">مرحباً بك</span>
-               <span className="text-sm font-bold text-gray-800">{session.user?.name}</span>
+        {/* Header - ناصع البياض مع تفاعلات ناعمة */}
+        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 flex items-center justify-between px-6 md:px-10">
+          <div className="flex items-center gap-4">
+             <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+               <User size={18} />
+             </div>
+             <div className="hidden sm:flex flex-col">
+               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">المسؤول</span>
+               <span className="text-sm font-black text-slate-900 underline underline-offset-4 decoration-emerald-100">{session.user?.name}</span>
              </div>
           </div>
           
-          {/* الرابط المعدل باستخدام الـ slug */}
           {restaurant?.slug && (
             <Link 
               href={`/r/${restaurant.slug}`} 
               target="_blank"
-              className="flex items-center gap-2 text-sm font-bold bg-orange-600 text-white px-6 py-2.5 rounded-2xl hover:bg-orange-700 transition-all shadow-lg shadow-orange-100 active:scale-95"
+              className="group flex items-center gap-2 text-sm font-black bg-slate-900 text-white px-6 py-3 rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-slate-200 active:scale-95"
             >
-              <span>معاينة المنيو</span>
-              <ExternalLink size={14} />
+              <span className="hidden md:inline">معاينة المنيو </span>
+              <span className="md:hidden">معاينة</span>
+              <ExternalLink size={16} className="group-hover:translate-y-[-2px] group-hover:translate-x-[1px] transition-transform" />
             </Link>
           )}
         </header>
 
-        <main className="p-8 max-w-7xl mx-auto w-full animate-in fade-in duration-500">
+        {/* محتوى الصفحة */}
+        <main className="p-6 md:p-10 w-full font-[tajawal] max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700">
           {children}
         </main>
       </div>

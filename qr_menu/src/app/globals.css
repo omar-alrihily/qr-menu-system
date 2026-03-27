@@ -31,8 +31,3 @@
 }
 
 /* تحسين شكل الخطوط العربية */
-body {
-  font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
