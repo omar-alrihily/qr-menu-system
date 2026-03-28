@@ -5,6 +5,11 @@ const RestaurantSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true }, 
   logo: { type: String, default: '' },
+
+  
+  // أضف هذه الحقول داخل Schema المطعم
+resetPasswordToken: { type: String },
+resetPasswordExpires: { type: Date },
   
   // --- حقول التخصيص البصري المتقدمة ---
   cover_image: { type: String, default: '' }, // صورة الغلاف (Hero)

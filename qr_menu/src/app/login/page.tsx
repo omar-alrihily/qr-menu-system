@@ -92,7 +92,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center px-1">
                 <label className="text-sm font-bold text-slate-700">كلمة المرور</label>
-                <Link href="#" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">نسيت كلمة المرور؟</Link>
+                <Link href="http://localhost:3000/forgot-password" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">نسيت كلمة المرور؟</Link>
               </div>
               <div className="relative group">
                 <Lock className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
