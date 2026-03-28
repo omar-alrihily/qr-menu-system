@@ -11,7 +11,8 @@ import {
   LogOut, 
   ExternalLink,
   User,
-  ChevronLeft
+  ChevronLeft,
+  Menu
 } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -25,14 +26,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { name: "الرئيسية", href: "/dashboard", icon: LayoutDashboard },
     { name: "الأقسام", href: "/dashboard/categories", icon: Layers },
     { name: "المنتجات", href: "/dashboard/products", icon: Utensils },
-    { name: "إعدادات المطعم", href: "/dashboard/settings", icon: Settings },
+    { name: "الإعدادات", href: "/dashboard/settings", icon: Settings },
   ];
 
   return (
     <div className="flex min-h-screen bg-[#FDFDFD] font-[tajawal] text-slate-900" dir="rtl">
       
-      {/* Sidebar - تصميم فاتح، بسيط وأنيق */}
-      <aside className="hidden md:flex w-72 flex-col bg-white border-l border-slate-100 sticky top-0 h-screen shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+      {/* Sidebar - Desktop */}
+      <aside className="hidden lg:flex w-72 flex-col bg-white border-l border-slate-100 sticky top-0 h-screen shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
         <div className="p-8 mb-4">
           <div className="flex items-center gap-3 group">
             <div className="w-11 h-11 bg-slate-900 rounded-2xl rotate-3 flex items-center justify-center text-white shadow-xl shadow-slate-200 group-hover:rotate-0 transition-all duration-500">
@@ -62,12 +63,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </nav>
 
         <div className="p-6 border-t border-slate-50">
-          <form 
-            action={async () => { 
-              "use server"; 
-              await signOut({ redirectTo: "/" });
-            }}
-          >
+          <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
             <button className="flex items-center gap-3 w-full px-5 py-3.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all font-bold text-sm group">
               <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
               تسجيل الخروج
@@ -77,36 +73,66 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header - ناصع البياض مع تفاعلات ناعمة */}
-        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 flex items-center justify-between px-6 md:px-10">
-          <div className="flex items-center gap-4">
-             <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
-               <User size={18} />
-             </div>
-             <div className="hidden sm:flex flex-col">
-               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">المسؤول</span>
-               <span className="text-sm font-black text-slate-900 underline underline-offset-4 decoration-emerald-100">{session.user?.name}</span>
-             </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 flex items-center justify-between px-4 md:px-10">
+          <div className="flex items-center gap-3">
+              {/* Mobile Logo Only */}
+              <div className="lg:hidden w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+                 <Utensils size={18} className="text-emerald-400" />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-slate-50 rounded-xl hidden sm:flex items-center justify-center text-slate-400 border border-slate-100">
+                  <User size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase leading-none mb-1">المسؤول</span>
+                  <span className="text-sm font-black text-slate-900 truncate max-w-[100px] sm:max-w-none">
+                    {session.user?.name}
+                  </span>
+                </div>
+              </div>
           </div>
           
           {restaurant?.slug && (
             <Link 
               href={`/r/${restaurant.slug}`} 
               target="_blank"
-              className="group flex items-center gap-2 text-sm font-black bg-slate-900 text-white px-6 py-3 rounded-2xl hover:bg-emerald-600 transition-all shadow-lg shadow-slate-200 active:scale-95"
+              className="group flex items-center gap-2 text-sm font-black bg-slate-900 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
             >
-              <span className="hidden md:inline">معاينة المنيو </span>
-              <span className="md:hidden">معاينة</span>
-              <ExternalLink size={16} className="group-hover:translate-y-[-2px] group-hover:translate-x-[1px] transition-transform" />
+              <span className="hidden sm:inline">معاينة المنيو</span>
+              <span className="sm:hidden text-xs">معاينة</span>
+              <ExternalLink size={14} className="group-hover:translate-y-[-1px] transition-transform" />
             </Link>
           )}
         </header>
 
         {/* محتوى الصفحة */}
-        <main className="p-6 md:p-10 w-full font-[tajawal] max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-3 duration-700">
+        <main className="p-4 md:p-10 w-full font-[tajawal] max-w-7xl mx-auto mb-24 lg:mb-0 animate-in fade-in slide-in-from-bottom-3 duration-700">
           {children}
         </main>
+
+        {/* Bottom Navigation - Mobile Only */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 z-50 flex justify-around items-center shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+          {menuItems.map((item) => (
+            <Link 
+              key={item.href}
+              href={item.href} 
+              className="flex flex-col items-center gap-1 px-3 py-1 text-slate-400 hover:text-emerald-600 transition-colors"
+            >
+              <item.icon size={20} />
+              <span className="text-[10px] font-bold">{item.name}</span>
+            </Link>
+          ))}
+          {/* Logout for mobile */}
+          <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
+            <button className="flex flex-col items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-500 transition-colors">
+              <LogOut size={20} />
+              <span className="text-[10px] font-bold">خروج</span>
+            </button>
+          </form>
+        </nav>
       </div>
     </div>
   );
