@@ -3,35 +3,69 @@
 import { registerRestaurant } from "../../lib/actions/auth";
 import { useState } from "react";
 import Link from "next/link";
-import { Store, Mail, Link as LinkIcon, Phone, Lock, CheckCircle2, Loader2 } from "lucide-react";
+import { Store, Mail, Link as LinkIcon, Phone, Lock, CheckCircle2, Loader2, ArrowRight, ChevronLeft, Globe } from "lucide-react";
 
-export default function Register() {
+// 1. تعريف المكون الفرعي خارج المكون الرئيسي أو داخله بشكل صحيح
+const InputGroup = ({ label, name, type, placeholder, icon, suffix }: any) => (
+  <div className="space-y-2.5">
+    <label className="block text-sm font-bold text-slate-700 px-1 text-right">
+      {label}
+    </label>
+    <div className="relative group" dir="rtl">
+      <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-emerald-500 transition-all duration-300">
+        {icon}
+      </div>
+      <input
+        name={name}
+        type={type}
+        required
+        placeholder={placeholder}
+        className="block w-full pr-12 pl-4 py-4 bg-slate-50/50 border border-slate-100 text-slate-900 rounded-2xl outline-none focus:bg-white focus:border-emerald-500 focus:ring-[6px] focus:ring-emerald-500/5 transition-all placeholder:text-slate-400 font-medium text-sm md:text-base text-right"
+      />
+      {suffix && (
+        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <span className="text-[10px] font-black text-emerald-600/50 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100/50">
+            {suffix}
+          </span>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+// 2. التصدير الافتراضي للمكون الرئيسي
+export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   async function handleAction(formData: FormData) {
     setLoading(true);
-    const res = await registerRestaurant(formData);
-    setLoading(false);
-    
-    if (res.success) {
-      setSuccess(true);
-    } else {
-      alert("حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى");
+    try {
+      const res = await registerRestaurant(formData);
+      if (res?.success) {
+        setSuccess(true);
+      } else {
+        alert("حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى");
+      }
+    } catch (error) {
+      alert("عذراً، حدث خطأ في الاتصال");
+    } finally {
+      setLoading(false);
     }
   }
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center font-sans" dir="rtl">
-        <div className="bg-slate-900/50 p-10 rounded-[2rem] border border-emerald-500/20 backdrop-blur-xl max-w-sm w-full shadow-2xl shadow-emerald-500/5 transition-all animate-in zoom-in-95">
-          <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-            <CheckCircle2 size={32} />
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 text-center " dir="rtl">
+        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] max-w-md w-full animate-in zoom-in-95 duration-500">
+          <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+            <CheckCircle2 size={42} strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">تم إنشاء الحساب!</h2>
-          <p className="text-slate-400 mb-8 text-sm leading-relaxed">مطعمك الآن جاهز للتحول الرقمي. يمكنك تسجيل الدخول والبدء فوراً.</p>
-          <Link href="/login" className="block w-full py-3.5 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/10">
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4 tracking-tight">تم إنشاء الحساب!</h2>
+          <p className="text-slate-500 mb-10 font-medium leading-relaxed">مطعمك الآن جاهز للتحول الرقمي. يمكنك البدء فوراً.</p>
+          <Link href="/login" className="flex items-center justify-center gap-3 w-full py-4.5 bg-slate-900 text-white font-black rounded-2xl hover:bg-emerald-600 transition-all active:scale-95 shadow-xl shadow-slate-200 group">
             تسجيل الدخول
+            <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>
@@ -39,129 +73,56 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col justify-center py-12 px-6 lg:px-8 font-sans relative overflow-hidden" dir="rtl">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" dir="rtl">
+      {/* Decorative Background */}
+      <div className="absolute top-[-10%] right-[-10%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-emerald-100/40 blur-[120px] rounded-full -z-10 animate-pulse" />
       
-      {/* تأثير ضوئي خلفي هادئ (Backlight) */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-emerald-500/10 blur-[120px] rounded-full -z-10" />
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        {/* شعار بسيط بألوان التصميم السابق */}
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-black shadow-lg shadow-emerald-500/20 rotate-12">
-            <Store size={24} />
-          </div>
+      <div className="w-full max-w-3xl mx-auto relative z-10">
+        <div className="flex justify-start mb-6 md:mb-10">
+          <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 transition-all group text-sm font-bold bg-white/80 backdrop-blur-md px-5 py-2.5 rounded-full shadow-sm border border-slate-100">
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            العودة للرئيسية
+          </Link>
         </div>
-        <h2 className="text-center text-3xl font-extrabold text-white tracking-tight">
-          أنشئ حساب مطعمك
-        </h2>
-        <p className="mt-2 text-center text-sm text-slate-500">
-          ابدأ اليوم بإنشاء منيو إلكتروني احترافي
-        </p>
-      </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px] relative z-10">
-        {/* الكرت بتصميم الهيكل الجديد ولكن بألوان الـ Dark Modern */}
-        <div className="bg-slate-900/50 px-8 py-10 shadow-2xl shadow-emerald-500/5 sm:rounded-3xl border border-white/5 backdrop-blur-xl">
+        <div className="text-center mb-8">
+          <div className="inline-flex w-16 h-16 bg-emerald-500 rounded-[1.25rem] items-center justify-center text-white mb-6 shadow-xl shadow-emerald-200 rotate-12">
+            <Store size={32} strokeWidth={2.5} />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3 tracking-tight">انضم إلى QR-Pro</h2>
+          <p className="text-slate-500 font-medium max-w-sm mx-auto">ابدأ رحلتك الرقمية الآن</p>
+        </div>
+
+        <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2.5rem] p-6 md:p-12 shadow-[0_25px_80px_-20px_rgba(0,0,0,0.06)]">
           <form action={handleAction} className="space-y-6">
-            
-            {/* الحقول بتصميم Minimalist المظلم */}
-            <div className="space-y-5">
-              
-              <InputGroup 
-                label="اسم المطعم" 
-                name="name" 
-                type="text" 
-                placeholder="مثلاً: شاورما السعادة" 
-                icon={<Store size={18} />} 
-              />
-
-              <InputGroup 
-                label="البريد الإلكتروني" 
-                name="email" 
-                type="email" 
-                placeholder="name@restaurant.com" 
-                icon={<Mail size={18} />} 
-              />
-
-              <InputGroup 
-                label="رابط المنيو الخاص بك" 
-                name="slug" 
-                type="text" 
-                placeholder="my-restaurant" 
-                icon={<LinkIcon size={18} />}
-                suffix=".menux.com" 
-              />
-
-              <InputGroup 
-                label="رقم الواتساب" 
-                name="whatsapp" 
-                type="tel" 
-                placeholder="9665xxxxxxxx" 
-                icon={<Phone size={18} />} 
-              />
-
-              <InputGroup 
-                label="كلمة المرور" 
-                name="password" 
-                type="password" 
-                placeholder="••••••••" 
-                icon={<Lock size={18} />} 
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+              <InputGroup label="اسم المنشأة" name="name" type="text" placeholder="مطعم السعادة" icon={<Store size={20} />} />
+              <InputGroup label="البريد الإلكتروني" name="email" type="email" placeholder="admin@store.com" icon={<Mail size={20} />} />
+              <InputGroup label="رابط المنيو" name="slug" type="text" placeholder="my-store" icon={<Globe size={20} />} suffix=".menux.com" />
+              <InputGroup label="رقم الواتساب" name="whatsapp" type="tel" placeholder="9665xxxxxxxx" icon={<Phone size={20} />} />
+              <div className="md:col-span-2">
+                <InputGroup label="كلمة المرور" name="password" type="password" placeholder="••••••••" icon={<Lock size={20} />} />
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-emerald-500/10 text-lg font-black text-black bg-emerald-500 hover:bg-emerald-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 transition-all disabled:bg-slate-700 disabled:opacity-70 disabled:cursor-not-allowed active:scale-95"
+              className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-2xl shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] mt-4"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin ml-2" size={20} />
-                  جاري معالجة طلبك...
-                </>
-              ) : (
-                "إنشاء الحساب الآن"
-              )}
+              {loading ? <><Loader2 className="animate-spin" size={22} /> جاري المعالجة...</> : <>إنشاء الحساب <ChevronLeft size={22} /></>}
             </button>
           </form>
 
-          <div className="mt-8 text-center pt-6 border-t border-white/5">
-            <p className="text-sm text-slate-500">
-              لديك حساب بالفعل؟{" "}
-              <Link href="/login" className="font-bold text-white hover:text-emerald-400 transition-colors">
+          <div className="mt-8 text-center pt-6 border-t border-slate-50">
+            <p className="text-slate-500 font-medium text-sm">
+              لديك حساب؟{" "}
+              <Link href="/login" className="text-emerald-600 font-black hover:text-emerald-700 transition-colors underline underline-offset-8">
                 سجل دخولك
               </Link>
             </p>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// مكون فرعي للحقول لضمان التناسق التام بألوان الـ Dark
-function InputGroup({ label, name, type, placeholder, icon, suffix }: any) {
-  return (
-    <div className="space-y-1.5 text-right">
-      <label className="block text-sm font-semibold text-slate-300 mr-1">
-        {label}
-      </label>
-      <div className="relative group">
-        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-emerald-500 transition-colors">
-          {icon}
-        </div>
-        <input
-          name={name}
-          type={type}
-          required
-          placeholder={placeholder}
-          className={`block w-full pr-11 pl-4 py-3 bg-slate-950/50 border border-white/5 text-white rounded-xl focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/50 outline-none transition-all placeholder:text-slate-600 text-sm`}
-        />
-        {suffix && (
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[10px] font-bold text-slate-600 uppercase tracking-widest font-mono">
-            {suffix}
-          </div>
-        )}
       </div>
     </div>
   );

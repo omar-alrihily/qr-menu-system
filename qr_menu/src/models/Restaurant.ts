@@ -6,10 +6,15 @@ const RestaurantSchema = new Schema({
   password: { type: String, required: true }, 
   logo: { type: String, default: '' },
   
-  // الحقول الجديدة للتخصيص
-  cover_image: { type: String, default: '' }, // صورة الغلاف للمنيو
-  primary_color: { type: String, default: '#f97316' }, // اللون الأساسي (برتقالي Tailwind الافتراضي)
-  bg_color: { type: String, default: '#F8F9FA' }, // لون خلفية الصفحة
+  // --- حقول التخصيص البصري المتقدمة ---
+  cover_image: { type: String, default: '' }, // صورة الغلاف (Hero)
+  primary_color: { type: String, default: '#f97316' }, // اللون الأساسي (الأزرار، الرموز، العملة)
+  bg_color: { type: String, default: '#F8F9FA' },      // لون خلفية الصفحة بالكامل
+  
+  // الحقول الجديدة التي طلبتها:
+  card_bg_color: { type: String, default: '#ffffff' },  // لون الصناديق (بطاقات المنتجات)
+  text_primary_color: { type: String, default: '#111827' }, // لون خط العناوين (الأقسام وأسماء الأطباق)
+  text_secondary_color: { type: String, default: '#6B7280' }, // لون خط الوصف (Description)
   
   whatsapp: { type: String, required: true },
   slug: { type: String, required: true, unique: true, lowercase: true },

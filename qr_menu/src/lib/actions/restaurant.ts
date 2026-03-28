@@ -12,15 +12,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// دالة مساعدة لرفع الملفات إلى Cloudinary لتقليل تكرار الكود
+// دالة مساعدة لرفع الملفات إلى Cloudinary
 async function uploadToCloudinary(file: File, folder: string) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
+    const stream = cloudinary.uploader.upload_stream(
       { folder: folder, resource_type: "image" },
       (error, result) => { if (error) reject(error); else resolve(result); }
-    ).end(buffer);
+    );
+    stream.end(buffer);
   });
 }
 
@@ -50,23 +51,32 @@ export async function updateRestaurantSettings(formData: FormData) {
       coverUrl = uploadResponse.secure_url;
     }
 
-    // 3. استخراج الألوان من الـ FormData
+    // 3. استخراج كافة الألوان من الـ FormData (بما فيها الحقول الجديدة)
     const primary_color = formData.get("primary_color") as string;
     const bg_color = formData.get("bg_color") as string;
+    const card_bg_color = formData.get("card_bg_color") as string;
+    const text_primary_color = formData.get("text_primary_color") as string;
+    const text_secondary_color = formData.get("text_secondary_color") as string;
+
+    const slug = (formData.get("slug") as string).toLowerCase().replace(/\s+/g, '-');
 
     // 4. تحديث البيانات في قاعدة البيانات
     await Restaurant.findByIdAndUpdate(restaurantId, {
       name: formData.get("name"),
       whatsapp: formData.get("whatsapp"),
-      slug: (formData.get("slug") as string).toLowerCase().replace(/\s+/g, '-'),
+      slug: slug,
       logo: logoUrl,
-      cover_image: coverUrl, // الحقل الجديد
-      primary_color: primary_color, // الحقل الجديد
-      bg_color: bg_color, // الحقل الجديد
+      cover_image: coverUrl,
+      primary_color: primary_color,
+      bg_color: bg_color,
+      card_bg_color: card_bg_color, // الحقل الجديد
+      text_primary_color: text_primary_color, // الحقل الجديد
+      text_secondary_color: text_secondary_color, // الحقل الجديد
     });
 
+    // إعادة التحقق من الكاش لتحديث البيانات فوراً في الواجهات
     revalidatePath("/dashboard/settings");
-    revalidatePath(`/r/${formData.get("slug")}`); // لتحديث صفحة المنيو العامة أيضاً
+    revalidatePath(`/r/${slug}`); 
     
     return { success: true };
   } catch (error: any) {
