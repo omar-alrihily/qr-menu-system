@@ -39,22 +39,42 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
         className="min-h-screen bg-[var(--bg-color)] selection:bg-orange-100 pb-10" 
         dir="rtl"
       >
-        
-        {/* --- Hero Section --- */}
-        <header className="relative h-[32vh] w-full overflow-hidden">
-          <Image 
-            src={restaurant.cover_image || "https://images.unsplash.com/photo-1504674900247-0877df9cc836"} 
-            alt="cover" fill className="object-cover transition-transform duration-700 hover:scale-110" priority
-          />
-          {/* التدرج اللوني الآن يندمج مع لون الخلفية المختار */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] via-black/10 to-black/40 z-10" />
-          
-          <div className="absolute top-6 left-0 right-0 z-20 px-6 flex justify-between items-center">
-            <button className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl text-white border border-white/20 hover:bg-white/30 transition-all active:scale-90">
-              <Share2 size={18} />
-            </button>
-          </div>
-        </header>
+      {/* --- Hero Section --- */}
+{restaurant.show_cover !== false ? (
+  <header className="relative w-full aspect-[16/7] md:aspect-[21/7] overflow-hidden bg-gray-100 animate-in fade-in duration-500">
+    <Image 
+      src={restaurant.cover_image || "https://images.unsplash.com/photo-1504674900247-0877df9cc836"} 
+      alt="cover" 
+      fill 
+      className="object-cover object-center transition-transform duration-700 hover:scale-105" 
+      priority
+      sizes="100vw"
+    />
+    
+    {/* تدرج لوني أنعم */}
+    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-color)] via-black/5 to-black/30 z-10" />
+    
+    <div className="absolute top-6 left-0 right-0 z-20 px-6 flex justify-between items-center">
+      <button className="p-3 bg-white/20 backdrop-blur-xl rounded-2xl text-white border border-white/20 hover:bg-white/30 transition-all active:scale-90 shadow-lg">
+        <Share2 size={18} />
+      </button>
+    </div>
+  </header>
+) : (
+  /* في حالة إخفاء الغلاف، نظهر فقط زر المشاركة بشكل أنيق وبسيط */
+  <div className="h-20 flex justify-between items-center px-6 pt-6">
+    <div /> {/* موازنة الفراغ */}
+    <button className="p-3 bg-white shadow-sm rounded-2xl text-gray-400 border border-gray-100 hover:bg-gray-50 transition-all active:scale-90">
+      <Share2 size={18} />
+    </button>
+  </div>
+)}
+
+{/* --- Brand Info Section --- */}
+{/* التعديل هنا: نتحكم في الهامش العلوي بناءً على وجود الغلاف */}
+<div className={`max-w-2xl mx-auto px-5 relative z-30 transition-all duration-500 ${restaurant.show_cover !== false ? '-mt-20' : 'mt-4'}`}>
+  {/* باقي كود اللوجو واسم المطعم ... */}
+</div>
 
         {/* --- Brand Card --- */}
         <div className="max-w-2xl mx-auto px-5 -mt-20 relative z-30">

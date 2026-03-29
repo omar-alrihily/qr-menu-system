@@ -34,9 +34,9 @@ export default async function DashboardPage() {
       const generatedQr = await QRCode.toDataURL(menuUrl, {
         width: 600,
         margin: 2,
-        color: {
-          dark: "#059669", 
-          light: "#ffffff",
+         color: {
+  dark: "#000000", 
+  light: "#ffffff",
         },
       });
       await Restaurant.findByIdAndUpdate(restaurant._id, { qr_code: generatedQr });

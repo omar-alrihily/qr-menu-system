@@ -12,6 +12,8 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+
+
 // دالة مساعدة لرفع الملفات إلى Cloudinary
 async function uploadToCloudinary(file: File, folder: string) {
   const arrayBuffer = await file.arrayBuffer();
@@ -51,7 +53,11 @@ export async function updateRestaurantSettings(formData: FormData) {
       coverUrl = uploadResponse.secure_url;
     }
 
-    // 3. استخراج كافة الألوان من الـ FormData (بما فيها الحقول الجديدة)
+    // 3. استخراج خيار إظهار/إخفاء الغلاف (جديد)
+    // بما أن الـ Input يرسل نصاً "true" أو "false"، نحوله إلى Boolean
+    const show_cover = formData.get("show_cover") === "true";
+
+    // 4. استخراج كافة الألوان من الـ FormData
     const primary_color = formData.get("primary_color") as string;
     const bg_color = formData.get("bg_color") as string;
     const card_bg_color = formData.get("card_bg_color") as string;
@@ -60,21 +66,22 @@ export async function updateRestaurantSettings(formData: FormData) {
 
     const slug = (formData.get("slug") as string).toLowerCase().replace(/\s+/g, '-');
 
-    // 4. تحديث البيانات في قاعدة البيانات
+    // 5. تحديث البيانات في قاعدة البيانات
     await Restaurant.findByIdAndUpdate(restaurantId, {
       name: formData.get("name"),
       whatsapp: formData.get("whatsapp"),
       slug: slug,
       logo: logoUrl,
       cover_image: coverUrl,
+      show_cover: show_cover, // حفظ الحالة الجديدة
       primary_color: primary_color,
       bg_color: bg_color,
-      card_bg_color: card_bg_color, // الحقل الجديد
-      text_primary_color: text_primary_color, // الحقل الجديد
-      text_secondary_color: text_secondary_color, // الحقل الجديد
+      card_bg_color: card_bg_color,
+      text_primary_color: text_primary_color,
+      text_secondary_color: text_secondary_color,
     });
 
-    // إعادة التحقق من الكاش لتحديث البيانات فوراً في الواجهات
+    // إعادة التحقق من الكاش لتحديث البيانات فوراً
     revalidatePath("/dashboard/settings");
     revalidatePath(`/r/${slug}`); 
     

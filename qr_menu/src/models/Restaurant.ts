@@ -20,7 +20,7 @@ resetPasswordExpires: { type: Date },
   card_bg_color: { type: String, default: '#ffffff' },  // لون الصناديق (بطاقات المنتجات)
   text_primary_color: { type: String, default: '#111827' }, // لون خط العناوين (الأقسام وأسماء الأطباق)
   text_secondary_color: { type: String, default: '#6B7280' }, // لون خط الوصف (Description)
-  
+  show_cover: { type: Boolean, default: true },
   whatsapp: { type: String, required: true },
   slug: { type: String, required: true, unique: true, lowercase: true },
   qr_code: {

@@ -4,6 +4,8 @@ import { Restaurant } from "@/models/Restaurant";
 import SettingsForm from "./SettingsForm"; // سننشئ هذا المكون الآن
 import { redirect } from "next/navigation";
 
+export const revalidate = 0;
+
 export default async function SettingsPage() {
   const session = await auth();
   if (!session) redirect("/login");
