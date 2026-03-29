@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import dbConnect from "@/lib/dbConnect";
 import { Restaurant } from "@/models/Restaurant";
+import { checkSubscriptionStatus } from "@/lib/actions/auth"; 
 import { 
   LayoutDashboard, 
   Utensils, 
@@ -12,7 +13,8 @@ import {
   ExternalLink,
   User,
   ChevronLeft,
-  Menu
+  AlertCircle,
+  Clock
 } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +22,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session) redirect("/login");
 
   await dbConnect();
-  const restaurant = await Restaurant.findOne({ email: session.user?.email }).select("slug").lean();
+  
+  // 1. جلب بيانات المطعم
+  let restaurant = await Restaurant.findOne({ email: session.user?.email });
+  if (!restaurant) redirect("/login");
+
+  // 2. كود الإصلاح التلقائي: إذا كان الحساب قديماً ولا يملك تاريخ انتهاء، نمنحه 30 يوماً فوراً
+  if (!restaurant.trialEndsAt) {
+    restaurant.trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    restaurant.subscriptionStatus = 'trial';
+    await restaurant.save();
+  }
+
+  // 3. التحقق من حالة الاشتراك الحقيقية
+  const subStatus = await checkSubscriptionStatus(restaurant._id.toString());
 
   const menuItems = [
     { name: "الرئيسية", href: "/dashboard", icon: LayoutDashboard },
@@ -72,16 +87,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* شريط التنبيه (Banner) */}
+        {subStatus.allowed && subStatus.isTrial && (
+          <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center justify-center gap-2 text-amber-800 text-xs sm:text-sm font-bold">
+            <Clock size={16} className="animate-pulse" />
+            <span>أنت في الفترة التجريبية، ينتهي وصولك خلال {subStatus.daysLeft} يوم.</span>
+            <Link href="/dashboard/settings" className="underline hover:text-amber-950 mr-2">اشترك الآن</Link>
+          </div>
+        )}
+
         {/* Header */}
         <header className="h-20 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 flex items-center justify-between px-4 md:px-10">
           <div className="flex items-center gap-3">
-              {/* Mobile Logo Only */}
               <div className="lg:hidden w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
                  <Utensils size={18} className="text-emerald-400" />
               </div>
-
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-slate-50 rounded-xl hidden sm:flex items-center justify-center text-slate-400 border border-slate-100">
                   <User size={18} />
@@ -95,7 +117,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </div>
           </div>
           
-          {restaurant?.slug && (
+          {restaurant?.slug && subStatus.allowed && (
             <Link 
               href={`/r/${restaurant.slug}`} 
               target="_blank"
@@ -108,12 +130,30 @@ export default async function DashboardLayout({ children }: { children: React.Re
           )}
         </header>
 
-        {/* محتوى الصفحة */}
+        {/* Content Area */}
         <main className="p-4 md:p-10 w-full font-[tajawal] max-w-7xl mx-auto mb-24 lg:mb-0 animate-in fade-in slide-in-from-bottom-3 duration-700">
-          {children}
+          {subStatus.allowed ? children : (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 bg-white rounded-3xl border border-dashed border-slate-200 p-8">
+              <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center shadow-inner">
+                <AlertCircle size={40} />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-black text-slate-900">انتهت صلاحية الوصول</h2>
+                <p className="text-slate-500 max-w-sm mx-auto font-medium">
+                  نأسف، ولكن اشتراكك الحالي قد انتهى. يرجى التجديد لتتمكن من إدارة منيو مطعمك مرة أخرى.
+                </p>
+              </div>
+              <Link 
+                href="/dashboard/settings" 
+                className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
+              >
+                تجديد الاشتراك الآن
+              </Link>
+            </div>
+          )}
         </main>
 
-        {/* Bottom Navigation - Mobile Only */}
+        {/* Mobile Navigation */}
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-2 py-3 z-50 flex justify-around items-center shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
           {menuItems.map((item) => (
             <Link 
@@ -125,7 +165,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <span className="text-[10px] font-bold">{item.name}</span>
             </Link>
           ))}
-          {/* Logout for mobile */}
           <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
             <button className="flex flex-col items-center gap-1 px-3 py-1 text-slate-400 hover:text-red-500 transition-colors">
               <LogOut size={20} />

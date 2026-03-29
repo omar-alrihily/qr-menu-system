@@ -26,7 +26,24 @@ resetPasswordExpires: { type: Date },
   qr_code: {
     type: String, 
     required: false
-  }
+  },
+
+  // --- حقول نظام الاشتراكات ---
+  plan: { 
+    type: String, 
+    enum: ['free', 'monthly', 'yearly'], 
+    default: 'free' 
+  },
+  subscriptionStatus: { 
+    type: String, 
+    enum: ['active', 'expired', 'trial'], 
+    default: 'trial' 
+  },
+  trialEndsAt: { type: Date },
+  subscriptionEndsAt: { type: Date },
+  
+  // حقل إضافي مفيد للتحكم اليدوي السريع
+  isBlocked: { type: Boolean, default: false },
 }, { timestamps: true });
 
 export const Restaurant = models.Restaurant || model('Restaurant', RestaurantSchema);
