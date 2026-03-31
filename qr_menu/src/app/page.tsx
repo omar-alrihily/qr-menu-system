@@ -1,243 +1,322 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-// استيراد الأيقونات الإضافية لزوم التصميم الجديد
-import { LayoutDashboard, QrCode, ShieldCheck, Zap, ArrowLeft, MessageCircle, Star } from 'lucide-react';
+import { 
+  LayoutDashboard, QrCode, ShieldCheck, Zap, 
+  ArrowLeft, MessageCircle, Star, Sparkles, 
+  CheckCircle2, Rocket, Smartphone, Palette 
+} from 'lucide-react';
 
-export default function LightLandingPage() {
+export default function FlexMenuLandingPage() {
   return (
-    // الخلفية الأساسية بيضاء تماماً مع نص داكن، وتحديد اتجاه النص RTL
-    <div className="min-h-screen bg-white text-slate-900 selection:bg-emerald-100" dir="rtl">
+    <div className="min-h-screen bg-white text-slate-900 selection:bg-emerald-100 selection:text-emerald-900" dir="rtl">
       
-      {/* 1. Header - تصميم عائم شفاف ولكن فاتح */}
-      <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4">
-        <nav className="w-full max-w-7xl bg-white/70 backdrop-blur-lg border border-slate-100 rounded-full px-5 py-2.5 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-2">
-            {/* الشعار احتفظنا به أخضر ولكنه أفتح قليلاً ليتناسب مع البياض */}
-            <div className="w-8 h-8 bg-emerald-500 rounded-xl rotate-12 flex items-center justify-center text-white font-black font-sans shadow-inner">Q</div>
-            <span className="text-xl font-bold tracking-tight text-slate-950">QR-<span className='text-emerald-600'>Pro</span></span>
+      {/* 1. Header - Navigation */}
+      <header className="fixed top-6 inset-x-0 z-50 flex justify-center px-4">
+        <nav className="w-full max-w-7xl bg-white/80 backdrop-blur-xl border border-slate-200/50 rounded-2xl px-6 py-3 flex items-center justify-between shadow-xl shadow-slate-200/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl rotate-3 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-200">
+              FM
+            </div>
+            <span className="text-2xl font-black tracking-tight text-slate-900">
+              Flex<span className='text-emerald-600'>Menu</span>
+            </span>
           </div>
           
-          <div className="hidden md:flex gap-7 text-sm font-medium text-slate-600">
-            <a href="#features" className="hover:text-emerald-600 transition-colors">المزايا</a>
-            <a href="#demo" className="hover:text-emerald-600 transition-colors">جرب المنيو</a>
-            <a href="#pricing" className="hover:text-emerald-600 transition-colors">الأسعار</a>
+          <div className="hidden md:flex gap-8 text-sm font-bold text-slate-500">
+            <a href="#features" className="hover:text-emerald-600 transition-colors relative group">
+              المزايا الكاملة
+              <span className="absolute -bottom-1 right-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full"></span>
+            </a>
+            <a href="#demo" className="hover:text-emerald-600 transition-colors relative group">
+              تجربة حية
+              <span className="absolute -bottom-1 right-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full"></span>
+            </a>
+            <a href="#steps" className="hover:text-emerald-600 transition-colors relative group">
+              كيف يعمل؟
+              <span className="absolute -bottom-1 right-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full"></span>
+            </a>
+            
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <Link href="/login" className="hidden sm:block text-slate-700 hover:text-emerald-700 text-sm font-semibold px-4 transition-colors">
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="hidden sm:block text-slate-600 hover:text-emerald-600 text-sm font-bold transition-colors">
               تسجيل الدخول
             </Link>
-            
             <Link 
               href="/register" 
-              className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-full font-bold text-sm transition-all hover:scale-105 shadow-md"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all hover:shadow-lg hover:shadow-emerald-200 active:scale-95"
             >
-              ابدأ مجاناً
+              ابدأ الآن مجاناً
             </Link>
           </div>
         </nav>
       </header>
 
-      {/* 2. Hero Section - تأثير قوى ولكن بألوان فاتحة وناعمة */}
-      <section className="relative pt-36 pb-20 overflow-hidden bg-gray-50/50">
-        {/* تدرجات لونيّة ناعمة جداً في الخلفية بدلاً من البقع المضيئة الداكنة */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-50/50 blur-[120px] rounded-full pointer-events-none" />
+      {/* 2. Hero Section - The Hook */}
+      {/* 2. Hero Section - تصميم عصري ومنساب */}
+      <section className="relative pt-48 pb-32 overflow-hidden bg-white">
+        {/* عناصر ديكورية للخلفية لتعزيز المظهر البصري */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-50/40 blur-[120px] rounded-full -z-10" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-50/30 blur-[100px] rounded-full -z-10" />
 
         <div className="max-w-7xl mx-auto px-6 text-center relative z-10">
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-8 leading-[1.15] tracking-tighter text-slate-950">
-            مستقبل المطاعم <br />
-            {/* تدرج لوني فاتح وأنيق */}
-            <span className="bg-gradient-to-l from-emerald-600 to-teal-500 bg-clip-text text-transparent">
-              رقمي بامتياز
-            </span>
-          </h1>
-          <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-600 mb-12 leading-relaxed font-medium">
-            وداعاً للمنيو الورقي التقليدي. امنح عملاءك تجربة تصفح تفاعلية، سريعة، وأنيقة مباشرة من هواتفهم عبر رمز QR مخصص لعلامتك التجارية.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-5">
-            <button className="px-10 py-4.5 bg-emerald-500 text-white rounded-full font-extrabold text-lg shadow-emerald-200 shadow-lg hover:bg-emerald-600 transition-all group flex items-center justify-center gap-2">
-              إنشاء حسابي الآن 
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1.5 transition-transform" />
-            </button>
-            <button className="px-10 py-4.5 bg-white border border-slate-200 text-slate-800 rounded-full font-bold text-lg hover:bg-slate-50 transition-colors shadow-sm">
-              جرب المنيو التجريبي
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Metrics Section - مظهر "مسطح" وأنيق */}
-      <section className="py-14 border-y border-slate-100 bg-white">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { label: 'متجر مشترك', val: '+2,500' },
-            { label: 'طلب يومي', val: '+50k' },
-            { label: 'سرعة التحميل', val: '0.8s' },
-            { label: 'تقييم الخدمة', val: '4.9/5' }
-          ].map((stat, i) => (
-            <div key={i} className="text-center p-5 bg-gray-50 rounded-2xl border border-slate-100">
-              <div className="text-4xl font-black text-emerald-600 mb-1.5">{stat.val}</div>
-              <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Features Section - إعادة تصميم كامل بنمط Bento Grid الفاتح */}
-      <section id="features" className="py-28 px-6 bg-gray-50/50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            {/* إزالة التسطير والمظهر القديم واستبداله بتصميم تايبوجرافي عصري */}
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-950 mb-4 tracking-tight">لماذا تختار <span className='text-emerald-600'>QR-Pro</span>؟</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">نحن لا نقدم مجرد كود، نحن نقدم أداة ذكية ومتكاملة لزيادة أرباح مطعمك.</p>
+          {/* Badge - متاح للجميع */}
+          <div className="inline-flex items-center gap-2 bg-white border border-slate-200 px-5 py-2 rounded-2xl text-slate-800 text-sm font-bold mb-10 shadow-sm transition-transform hover:scale-105">
+            <Sparkles size={16} className="text-emerald-500" />
+            <span>كافة المميزات الاحترافية <span className="text-emerald-600">متاحة لك فوراً</span></span>
           </div>
           
-          {/* شبكة بينتو (Bento Grid) - توزيع غير متساوي للمظاهر العصرية */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* ميزة 1 - كبيرة (طولية) */}
-            <div className="md:row-span-2 group p-9 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:border-emerald-100 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="mb-8 bg-emerald-50 w-16 h-16 rounded-2xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
-                  <LayoutDashboard className="text-emerald-600" size={32} />
-                </div>
-                <h4 className="text-2xl font-bold mb-4 text-slate-950">لوحة تحكم ذكية</h4>
-                <p className="text-slate-600 leading-relaxed font-medium">إدارة كاملة للأصناف، الأسعار، والإضافات بمرونة تامة ومن أي مكان، مع إحصائيات دقيقة لمبيعاتك.</p>
-              </div>
-              <div className="mt-10 pt-6 border-t border-slate-100 text-sm text-emerald-700 font-bold">سهولة تحكم مطلقة ✓</div>
-            </div>
-
-            {/* ميزة 2 - عريضة */}
-            <div className="md:col-span-2 group p-9 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 flex items-center gap-8">
-              <div className="mb-6 bg-blue-50 w-16 h-16 rounded-2xl flex items-center justify-center border border-blue-100 flex-shrink-0">
-                <QrCode className="text-blue-600" size={32} />
-              </div>
-              <div>
-                <h4 className="text-2xl font-bold mb-3 text-slate-950">QR مخصص لهويتك</h4>
-                <p className="text-slate-600 leading-relaxed font-medium">صمم الكود الخاص بك بألوان متجرك وشعارك لتعزيز الهوية البصرية، واجعله قابلاً للمسح بسهولة.</p>
-              </div>
-            </div>
-
-            {/* ميزة 3 - عريضة */}
-            <div className="md:col-span-2 group p-9 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:border-purple-100 transition-all duration-300 flex items-center gap-8">
-              <div className="mb-6 bg-purple-50 w-16 h-16 rounded-2xl flex items-center justify-center border border-purple-100 flex-shrink-0">
-                <ShieldCheck className="text-purple-600" size={32} />
-              </div>
-              <div>
-                <h4 className="text-2xl font-bold mb-3 text-slate-950">أمان واستقرار سحابي</h4>
-                <p className="text-slate-600 leading-relaxed font-medium">خدمة سحابية موثوقة تضمن عمل المنيو الخاص بك على مدار الساعة دون توقف، مع حماية كاملة لبياناتك.</p>
-              </div>
-            </div>
-             
+          <h1 className="text-6xl md:text-8xl font-black mb-8 leading-[1.1] tracking-tight text-slate-950">
+            منيو إلكتروني<br />
+            <span className="relative">
+              <span className="relative z-10 text-emerald-600">مميز لكل مطعم</span>
+              <svg className="absolute -bottom-2 left-0 w-full h-3 text-emerald-100 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                <path d="M0 5 Q 25 0 50 5 T 100 5" stroke="currentColor" strokeWidth="8" fill="transparent" />
+              </svg>
+            </span>
+          </h1>
+          
+          <p className="max-w-4xl mx-auto text-xl md:text-2xl text-slate-500 mb-14 leading-relaxed font-medium">
+            امنح عملائك تجربة تصفح تفاعلية تتجاوز توقعاتهم. سرعة فائقة، نظام طلب ذكي، وتصميم يعكس تفرد علامتك التجارية.. 
+            <span className="block mt-4 text-slate-900 font-bold">بحرية كاملة، وبدون أي حدود لاستخدامك.</span>
+          </p>
+          
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+            <button className="w-full sm:w-auto px-14 py-5 bg-emerald-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-emerald-200 hover:bg-emerald-700 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3">
+              أنشئ قائمتك الآن
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <button className="w-full sm:w-auto px-14 py-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-[2rem] font-bold text-xl hover:bg-white hover:border-slate-300 transition-all flex items-center justify-center gap-2">
+              <Zap size={20} className="text-amber-500 fill-amber-500" />
+              تجربة حية
+            </button>
           </div>
+
+          {/* تلميح بصري أسفل الأزرار */}
+          <p className="mt-8 text-sm font-bold text-slate-400 flex items-center justify-center gap-2">
+            <CheckCircle2 size={16} className="text-emerald-500" />
+            لا يتطلب بطاقة ائتمان • إعداد في أقل من دقيقتين
+          </p>
         </div>
       </section>
 
-      {/* 5. Demo Section - تصميم أنيق "Soft" مع هاتف وهمي فاتح */}
-      <section id="demo" className="py-28 bg-white">
+      {/* 3. Social Proof & Quick Stats */}
+      <section className="py-20 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-emerald-50 rounded-[3rem] p-10 md:p-16 overflow-hidden relative border border-emerald-100 shadow-inner">
-            <div className="grid lg:grid-cols-5 gap-12 items-center relative z-10">
-              
-              <div className="lg:col-span-3">
-                <div className="flex items-center gap-2 mb-6">
-                    <Zap className="text-emerald-500 w-6 h-6"/>
-                    <span className="text-emerald-800 font-bold text-sm bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">السرعة والبساطة</span>
-                </div>
-                <h3 className="text-4xl md:text-5xl font-black mb-8 text-slate-950 leading-tight">سهولة الاستخدام هي أولويتنا</h3>
-                <ul className="space-y-6">
-                  {[
-                    "تحديثات فورية للأصناف دون الحاجة لإعادة طباعة الكود.",
-                    "دعم كامل لجميع أنواع الموبايلات والمتصفحات الحديثة.",
-                    "نظام طلبات واتساب متطور ومؤتمت بالكامل لراحة بالك."
-                  ].map((text, i) => (
-                    <li key={i} className="flex items-start gap-4 text-lg text-slate-700 font-medium">
-                        <div className="w-7 h-7 rounded-full bg-white text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow border border-emerald-100">✓</div>
-                        <span>{text}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <div className='flex gap-4 mt-12'>
-                   <div className='flex items-center gap-1.5 bg-white p-3 rounded-2xl border border-emerald-100 shadow-sm'>
-                       <MessageCircle className='w-10 h-10 text-emerald-500 bg-emerald-50 p-2 rounded-xl' />
-                       <div className='text-sm'>
-                           <div className='font-bold text-slate-900'>مدمج مع واتساب</div>
-                           <div className='text-slate-500'>استقبل طلباتك فوراً</div>
-                       </div>
-                   </div>
-                   <div className='flex items-center gap-1.5 bg-white p-3 rounded-2xl border border-emerald-100 shadow-sm'>
-                       <Star className='w-10 h-10 text-amber-500 bg-amber-50 p-2 rounded-xl fill-amber-400' />
-                       <div className='text-sm'>
-                           <div className='font-bold text-slate-900'>نظام تقييم</div>
-                           <div className='text-slate-500'>اعرف آراء عملائك</div>
-                       </div>
-                   </div>
-                </div>
-
-              </div>
-              
-              {/* قسم الهاتف - تم تحويله ليصبح فاتحاً وأنيقاً */}
-              <div className="lg:col-span-2 relative">
-                {/* تأثير خلفية توهج ناعم وأخضر */}
-                <div className="absolute inset-0 bg-emerald-200/50 blur-[80px] rounded-full" />
-                
-                {/* مجسم الهاتف - لون فاتح */}
-                <div className="relative bg-white rounded-[2.5rem] border-[10px] border-slate-900/5 p-3 shadow-2xl rotate-3 h-[500px] w-[260px] mx-auto flex flex-col">
-                    {/* الكاميرا العلويّة (Notch) */}
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-slate-900/5 rounded-b-xl z-20"></div>
-                    
-                    {/* شاشة الهاتف */}
-                    <div className="bg-slate-50 h-full rounded-[1.8rem] flex flex-col items-center justify-center text-slate-400 p-4 border border-slate-100 overflow-hidden relative">
-                       {/* محاكاة واجهة منيو فاتحة */}
-                       <div className='absolute top-6 left-4 right-4 h-6 bg-slate-100 rounded-full'></div>
-                       <div className='absolute top-16 left-4 w-16 h-16 bg-slate-100 rounded-2xl'></div>
-                       <div className='absolute top-16 left-24 right-4 h-5 bg-slate-100 rounded-full'></div>
-                       <div className='absolute top-24 left-24 right-12 h-4 bg-slate-100 rounded-full'></div>
-                       
-                       <div className='w-full space-y-3 mt-20'>
-                           <div className='h-24 bg-white rounded-2xl border border-slate-100 p-3 flex gap-3'>
-                               <div className='w-16 h-16 bg-emerald-50 rounded-xl border border-emerald-100'></div>
-                               <div className='flex-1 space-y-2'>
-                                   <div className='h-4 bg-slate-100 rounded-full w-3/4'></div>
-                                   <div className='h-3 bg-slate-100 rounded-full w-1/2'></div>
-                                   <div className='h-4 bg-emerald-100 rounded-full w-1/4 mt-2'></div>
-                               </div>
-                           </div>
-                           <div className='h-24 bg-white rounded-2xl border border-slate-100 p-3 flex gap-3'>
-                               <div className='w-16 h-16 bg-emerald-50 rounded-xl border border-emerald-100'></div>
-                               <div className='flex-1 space-y-2'>
-                                   <div className='h-4 bg-slate-100 rounded-full w-3/4'></div>
-                                   <div className='h-3 bg-slate-100 rounded-full w-1/2'></div>
-                                   <div className='h-4 bg-emerald-100 rounded-full w-1/4 mt-2'></div>
-                               </div>
-                           </div>
-                       </div>
-
-                       <div className='absolute bottom-4 left-4 right-4 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md'>
-                           عرض السلة (٢)
-                       </div>
-                    </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+            {[
+              { label: 'شريك نجاح يثق بنا', val: '+1,500', icon: Star },
+              { label: 'طلبات ناجحة يومياً', val: '+40k', icon: Rocket },
+              { label: 'سرعة استجابة فائقة', val: '0.8s', icon: Zap },
+              { label: 'رضا أصحاب المطاعم', val: '99%', icon: CheckCircle2 }
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center group">
+                <div className="text-4xl md:text-5xl font-black text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">{stat.val}</div>
+                <div className="text-slate-500 font-bold flex items-center gap-2">
+                  <stat.icon size={16} className="text-emerald-500" />
+                  {stat.label}
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      {/* 4. Features - The "Unlimited" Promise */}
+      <section id="features" className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-24">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6">قوة التحكم بين يديك</h2>
+            <p className="text-xl text-slate-500 max-w-3xl mx-auto">في فليكس منيو، نؤمن بأن نجاحك لا يجب أن يكون محدوداً. لذلك، نوفر لك كافة الأدوات الاحترافية منذ اللحظة الأولى.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group">
+              <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                <LayoutDashboard size={32} />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">لوحة تحكم ذكية وشاملة</h3>
+              <p className="text-slate-500 leading-relaxed text-lg">أضف و عدل او غيّر الأسعار  بضغطة زر واحدة تحديثات فورية تظهر لعملائك في نفس اللحظة</p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group">
+              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-8 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <Palette size={32} />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">هوية بصرية مخصصة</h3>
+              <p className="text-slate-500 leading-relaxed text-lg">المنيو الخاص بك يجب أن يشبه هويتك التجارية. اختر الألوان ارفع شعارك وخصص تصميم الـ QR ليتناسب مع فخامة علامتك التجارية</p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all group">
+              <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-8 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                <Smartphone size={32} />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">تجربة مستخدم مثالية</h3>
+              <p className="text-slate-500 leading-relaxed text-lg">مصمم ليعمل بسرعة فائقة على كافة الهواتف. صور الأطباق تظهر بجودة عالية تفتح شهية عملائك وتزيد من حجم الطلب.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Footer - بسيط وواضح بخلفية رمادية فاتحة */}
-      <footer className="py-14 px-6 bg-gray-50 border-t border-slate-100 text-center">
-        <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center gap-2 mb-6">
-                <div className="w-7 h-7 bg-emerald-500 rounded-lg rotate-12 flex items-center justify-center text-white font-black font-sans text-xs">Q</div>
-                <span className="text-lg font-bold tracking-tight text-slate-950">QR-Pro</span>
+      {/* 4. Artistic Steps Section - مسار فني أفقي سطر واحد */}
+      
+
+      {/* 5. Demo Section - Interactive Visual */}
+      <section id="demo" className="py-20 bg-slate-900 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 blur-[120px] rounded-full" />
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-black text-white mb-8 leading-tight">اجعل التواصل مع عملائك <br /><span className="text-emerald-400">أسرع وأذكى</span></h2>
+              
+              <div className="space-y-6">
+                {[
+                  { title: "طلبات واتساب مباشرة", desc: "استقبل طلبات عملائك من المنيو إلى الواتساب الخاص بك فوراً بتنسيق احترافي.", icon: MessageCircle },
+             { 
+  title: "وصول بلمسة.. وتميز بـ QR فريد", 
+  desc: "اجذب عملاءك بـ كود QR مخصص يحمل شعار مطعمك وألوانه، يفتح  فوراً بمسحة واحدة من كاميرا الهاتف، دون انتظار أو تطبيقات.", 
+  icon: QrCode 
+},
+                  { title: "أمان واستقرار 100%", desc: "منيو مطعمك متاح دائماً على سيرفراتنا السحابية فائقة السرعة.", icon: ShieldCheck }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-5">
+                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-emerald-400 flex-shrink-0 border border-white/5">
+                      <item.icon size={24} />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-bold text-white mb-1">{item.title}</h4>
+                      <p className="text-slate-400 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-slate-500 font-medium">جميع الحقوق محفوظة © 2026 QR-Pro. صنع بحب لخدمة قطاع الضيافة.</p>
+
+            <div className="relative">
+               {/* Phone Mockup Re-designed */}
+               <div className="relative z-10 w-[300px] h-[600px] mx-auto bg-slate-800 rounded-[3.5rem] border-[8px] border-slate-700 shadow-2xl p-4">
+                  <div className="w-24 h-6 bg-slate-700 rounded-b-2xl mx-auto mb-6"></div>
+                  <div className="bg-white h-[510px] rounded-[2.5rem] overflow-hidden flex flex-col p-4">
+                    <div className="w-full h-32 bg-slate-100 rounded-2xl mb-4 animate-pulse"></div>
+                    <div className="space-y-4">
+                      <div className="h-4 bg-slate-100 rounded-full w-2/3"></div>
+                      <div className="h-20 bg-emerald-50 rounded-2xl flex items-center p-3 gap-3">
+                        <div className="w-12 h-12 bg-emerald-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                           <div className="h-3 bg-emerald-100 rounded-full w-3/4"></div>
+                           <div className="h-2 bg-emerald-100 rounded-full w-1/2"></div>
+                        </div>
+                      </div>
+                      <div className="h-20 bg-slate-50 rounded-2xl flex items-center p-3 gap-3">
+                        <div className="w-12 h-12 bg-slate-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                           <div className="h-3 bg-slate-100 rounded-full w-3/4"></div>
+                           <div className="h-2 bg-slate-100 rounded-full w-1/2"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-auto h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold">
+                       إرسال الطلب عبر واتساب
+                    </div>
+                  </div>
+               </div>
+               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-emerald-500/20 blur-3xl rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="steps" className="py-24 bg-white relative overflow-hidden border-y border-slate-100">
+        {/* توهج خلفي ناعم لتعزيز المظهر الفني */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-1/2 bg-gradient-to-r from-emerald-50/20 via-white to-emerald-50/20 blur-3xl rounded-full" />
+        
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-black text-slate-950 mb-4 tracking-tight">انطلق <span className='text-emerald-600'>في دقائق</span></h2>
+            <p className="text-lg text-slate-500 font-medium">خطوات بسيطة تفصلك عن امتلاك منيو ذكي واحترافي</p>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-0 relative">
+            {/* خط الربط الفني - يظهر في الشاشات الكبيرة */}
+            <div className="hidden md:block absolute top-[28px] left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-emerald-100 via-emerald-400 to-emerald-100" />
+
+            {/* الخطوة 1 */}
+            <div className="flex-1 flex flex-col items-center group relative z-10 w-full md:w-auto">
+              {/* الرقم والأيقونة مدمجان في تصميم واحد */}
+              <div className="w-16 h-16 bg-white border-2 border-emerald-500 rounded-full flex items-center justify-center text-emerald-600 mb-6 shadow-xl shadow-emerald-100 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                 <span className="text-2xl font-black">1</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-slate-950 flex items-center gap-2 justify-center">
+                   سجل حسابك <CheckCircle2 className='w-5 h-5 text-emerald-500' />
+                </h3>
+                <p className="text-slate-500 text-sm font-medium">ابدأ فوراً بكافة المزايا</p>
+              </div>
+            </div>
+
+            {/* الخطوة 2 */}
+            <div className="flex-1 flex flex-col items-center group relative z-10 w-full md:w-auto">
+              <div className="w-16 h-16 bg-white border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 mb-6 shadow-xl shadow-slate-100 group-hover:scale-110 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
+                 <span className="text-2xl font-black">2</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-slate-950 flex items-center gap-2 justify-center">
+                   املأ قائمتك <LayoutDashboard className='w-5 h-5 text-slate-600' />
+                </h3>
+                <p className="text-slate-500 text-sm font-medium">أضف منتجاتك وصورك بسهولة</p>
+              </div>
+            </div>
+
+            {/* الخطوة 3 */}
+            <div className="flex-1 flex flex-col items-center group relative z-10 w-full md:w-auto">
+              <div className="w-16 h-16 bg-white border-2 border-emerald-400 rounded-full flex items-center justify-center text-emerald-500 mb-6 shadow-xl shadow-emerald-100 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+                 <span className="text-2xl font-black">3</span>
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-slate-950 flex items-center gap-2 justify-center">
+                   شارك الـ QR <QrCode className='w-5 h-5 text-emerald-400' />
+                </h3>
+                <p className="text-slate-500 text-sm font-medium">تميز ببراندك الخاص</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 6. CTA Section */}
+      <section className="py-24 px-6 text-center">
+        <div className="max-w-4xl mx-auto bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[3rem] p-12 md:p-20 text-white shadow-2xl shadow-emerald-200 relative overflow-hidden">
+          <div className="relative z-10">
+            <h2 className="text-4xl md:text-6xl font-black mb-8">جاهز لنقل مطعمك للمستوى التالي؟</h2>
+            <p className="text-xl text-emerald-50 mb-12 opacity-90">انضم إلى مئات المطاعم التي بدأت رحلة التحول الرقمي معنا. لا حاجة لبطاقة ائتمان، جميع المزايا متاحة من الآن!</p>
+            <button className="bg-white text-emerald-700 px-12 py-5 rounded-2xl font-black text-2xl hover:bg-emerald-50 transition-all hover:scale-105 active:scale-95 shadow-xl">
+              ابدأ الآن مجاناً 🚀
+            </button>
+          </div>
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+             <QrCode size={400} className="-translate-x-1/2 -translate-y-1/2 rotate-12" />
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Footer */}
+      <footer className="py-12 border-t border-slate-100 text-center">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-sm">FM</div>
+            <span className="font-black text-xl">FlexMenu</span>
+          </div>
+          <p className="text-slate-400 font-medium italic">صنع بشغف لخدمة المبدعين في عالم الضيافة © 2026</p>
+          <div className="flex gap-6 text-slate-500 font-bold">
+          </div>
         </div>
       </footer>
-
     </div>
   );
 }

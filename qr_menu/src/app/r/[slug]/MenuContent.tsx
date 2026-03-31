@@ -77,47 +77,88 @@ export default function MenuContent({ categories, products, restaurant }: any) {
                 {catProducts.map((product: any) => {
                   const cartItem = cart.find((item) => item._id === product._id);
                   return (
-                    // لون الصندوق ديناميكي
-                    <div key={product._id} 
-                      style={{ backgroundColor: 'var(--card-bg)' }}
-                      className="rounded-[2rem] p-4 flex gap-4 border border-gray-100 shadow-sm transition-all"
-                    >
-                      <div className="flex-1 flex flex-col justify-between py-1">
-                        <div>
-                          {/* لون اسم المنتج ديناميكي */}
-                          <h3 style={{ color: 'var(--text-main)' }} className="font-black text-lg mb-1">{product.name_ar}</h3>
-                          {/* لون الوصف ديناميكي */}
-                          <p style={{ color: 'var(--text-sub)' }} className="text-[12px] line-clamp-2">{product.description_ar}</p>
-                        </div>
-                        <div className="flex items-center justify-between mt-4">
-                          {/* السعر يتبع لون النص الأساسي وعلامة ر.س تتبع اللون الرئيسي */}
-                          <span style={{ color: 'var(--text-main)' }} className="text-xl font-black">
-                            {product.price} <small style={{ color: 'var(--primary-color)' }} className="text-[11px]">ر.س</small>
-                          </span>
-                          
-                          {cartItem ? (
-                             <div className="flex items-center gap-3 bg-gray-900 rounded-2xl p-1.5 shadow-lg">
-                               <button onClick={() => removeFromCart(product._id)} className="w-8 h-8 flex items-center justify-center text-white"><Minus size={14}/></button>
-                               <span className="text-white font-bold">{cartItem.qty}</span>
-                               <button onClick={() => addToCart(product)} style={{ backgroundColor: 'var(--primary-color)' }} className="w-8 h-8 rounded-xl flex items-center justify-center text-white"><Plus size={14}/></button>
-                             </div>
-                          ) : (
-                            <button 
-                              onClick={() => addToCart(product)} 
-                              style={{ color: 'var(--text-main)' }}
-                              className="h-10 px-5 bg-gray-50/50 rounded-xl font-bold text-sm flex items-center gap-2 border border-gray-100/50"
-                            >
-                              إضافة <Plus size={14} style={{ color: 'var(--primary-color)' }} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      {product.image && (
-                        <div className="relative w-24 h-24 shrink-0 rounded-2xl overflow-hidden shadow-sm border border-gray-50">
-                          <Image src={product.image} alt={product.name_ar} fill className="object-cover" />
-                        </div>
-                      )}
-                    </div>
+                    <div 
+  key={product._id} 
+  style={{ backgroundColor: 'var(--card-bg)' }}
+  className="group relative rounded-[2.5rem] p-3 flex gap-4 border border-gray-100/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out overflow-hidden"
+>
+  {/* صورة المنتج مع تأثير زووم عند الحوم (Hover) */}
+  {product.image && (
+    <div className="relative w-28 h-28 shrink-0 rounded-[2rem] overflow-hidden shadow-md border border-white/20">
+      <Image 
+        src={product.image} 
+        alt={product.name_ar} 
+        fill 
+        className="object-cover transition-transform duration-500 group-hover:scale-110" 
+      />
+    </div>
+  )}
+
+  <div className="flex-1 flex flex-col justify-between py-2">
+    <div>
+      <h3 
+        style={{ color: 'var(--text-main)' }} 
+        className="font-black text-[1.1rem] leading-tight mb-1.5 line-clamp-1"
+      >
+        {product.name_ar}
+      </h3>
+      <p 
+        style={{ color: 'var(--text-sub)' }} 
+        className="text-[11px] leading-relaxed opacity-80 line-clamp-2 leading-4"
+      >
+        {product.description_ar}
+      </p>
+    </div>
+
+    <div className="flex items-end justify-between mt-2">
+      <div className="flex flex-col">
+        <span 
+          style={{ color: 'var(--text-main)' }} 
+          className="text-xl font-black flex items-baseline gap-1"
+        >
+          {product.price}
+          <span style={{ color: 'var(--primary-color)' }} className="text-[10px] font-bold uppercase">ر.س</span>
+        </span>
+      </div>
+
+      {cartItem ? (
+        <div className="flex items-center bg-gray-900/95 backdrop-blur-sm rounded-2xl p-1 shadow-lg transform scale-105 transition-transform">
+          <button 
+            onClick={() => removeFromCart(product._id)} 
+            className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-colors"
+          >
+            <Minus size={14} strokeWidth={3} />
+          </button>
+          
+          <span className="text-white font-bold px-2 min-w-[24px] text-center">{cartItem.qty}</span>
+          
+          <button 
+            onClick={() => addToCart(product)} 
+            style={{ backgroundColor: 'var(--primary-color)' }} 
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-inner active:scale-90 transition-transform"
+          >
+            <Plus size={14} strokeWidth={3} />
+          </button>
+        </div>
+      ) : (
+        <button 
+          onClick={() => addToCart(product)} 
+          style={{ 
+            backgroundColor: 'var(--primary-color)',
+            boxShadow: `0 4px 14px 0 var(--primary-color-transparent, rgba(0,0,0,0.1))` 
+          }}
+          className="h-10 w-10 sm:w-auto sm:px-5 rounded-2xl flex items-center justify-center gap-2 text-white font-bold transition-all active:scale-95 hover:brightness-110"
+        >
+          <span className="hidden sm:block text-sm">إضافة</span>
+          <Plus size={18} strokeWidth={3} />
+        </button>
+      )}
+    </div>
+  </div>
+
+  {/* لمسة جمالية: خلفية باهتة تتحرك عند الحوم */}
+  <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-color opacity-[0.03] rounded-full blur-3xl group-hover:opacity-[0.08] transition-opacity" />
+</div>
                   );
                 })}
               </div>
