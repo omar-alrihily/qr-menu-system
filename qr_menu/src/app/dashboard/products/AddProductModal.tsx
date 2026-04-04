@@ -2,9 +2,19 @@
 import { useState } from "react";
 import { createProduct } from "@/lib/actions/product";
 
+// خيارات مسببات الحساسية الشائعة
+const ALLERGENS_OPTIONS = [
+  { id: 'nuts', label: 'مكسرات' },
+  { id: 'eggs', label: 'بيض' },
+  { id: 'milk', label: 'ألبان' },
+  { id: 'gluten', label: 'جلوتين' },
+  { id: 'seafood', label: 'مأكولات بحرية' },
+  { id: 'soy', label: 'صويا' },
+];
+
 export default function AddProductModal({ categories }: { categories: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false); // حالة التحميل
+  const [loading, setLoading] = useState(false);
 
   return (
     <>
@@ -21,7 +31,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
             <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-4">إضافة منتج جديد للمنيو</h2>
             
             <form action={async (fd) => { 
-                setLoading(true); // بدء التحميل
+                setLoading(true);
                 try {
                   const res = await createProduct(fd);
                   if(res?.success) {
@@ -30,7 +40,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                     alert(res?.error || "حدث خطأ ما");
                   }
                 } finally {
-                  setLoading(false); // إنهاء التحميل
+                  setLoading(false);
                 }
               }} className="grid grid-cols-2 gap-4">
               
@@ -44,7 +54,6 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 </select>
               </div>
 
-              {/* حقل رفع الصورة الجديد */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">صورة المنتج</label>
                 <input 
@@ -75,7 +84,31 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 <input name="price" type="number" step="0.01" placeholder="0.00" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" required />
               </div>
 
+              {/* الحقل الجديد: السعرات الحرارية */}
               <div className="col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">السعرات (Cal)</label>
+                <input name="calories" type="number" placeholder="0" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" />
+              </div>
+
+              {/* الحقل الجديد: مسببات الحساسية */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">مسببات الحساسية</label>
+                <div className="grid grid-cols-3 gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  {ALLERGENS_OPTIONS.map((option) => (
+                    <label key={option.id} className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer hover:text-green-600 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        name="allergens" 
+                        value={option.id} 
+                        className="w-4 h-4 accent-green-600 rounded"
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">الترتيب</label>
                 <input name="sort_order" type="number" placeholder="0" defaultValue="0" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" />
               </div>
@@ -86,7 +119,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                   disabled={loading}
                   className={`flex-1 text-white py-2.5 rounded-lg font-bold transition-all ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 cursor-pointer'}`}
                 >
-                  {loading ? "جاري الرفع والحفظ..." : "حفظ المنتج"}
+                  {loading ? "جاري الحفظ..." : "حفظ المنتج"}
                 </button>
                 <button 
                   type="button" 

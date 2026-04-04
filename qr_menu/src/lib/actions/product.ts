@@ -50,6 +50,8 @@ export async function createProduct(formData: FormData) {
       name_en: formData.get("name_en"),
       description_ar: formData.get("description_ar"),
       description_en: formData.get("description_en"),
+      calories: Number(formData.get("calories")) || 0,
+      allergens: formData.getAll("allergens"), // لاستقبال عدة قيم من الـ Checkboxes
       price: Number(formData.get("price")),
       sort_order: Number(formData.get("sort_order")) || 0,
       image: imageUrl || "", 
@@ -92,6 +94,8 @@ export async function updateProduct(id: string, formData: FormData) {
       name_en: formData.get("name_en"),
       description_ar: formData.get("description_ar"),
       description_en: formData.get("description_en"),
+      calories: Number(formData.get("calories")) || 0,
+      allergens: formData.getAll("allergens"),
       price: Number(formData.get("price")),
       sort_order: Number(formData.get("sort_order")) || 0,
       image: imageUrl,
