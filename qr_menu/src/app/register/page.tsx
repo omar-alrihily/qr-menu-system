@@ -1,12 +1,12 @@
 "use client";
 
-import { registerRestaurant } from "../../lib/actions/auth";
-import { useState } from "react";
+import { registerRestaurant } from "@/lib/actions/auth";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Store, Mail, Link as LinkIcon, Phone, Lock, CheckCircle2, Loader2, ArrowRight, ChevronLeft, Globe } from "lucide-react";
+import { Store, Mail, Phone, Lock, CheckCircle2, Loader2, ArrowRight, ChevronLeft, Globe } from "lucide-react";
 
-// 1. تعريف المكون الفرعي خارج المكون الرئيسي أو داخله بشكل صحيح
-const InputGroup = ({ label, name, type, placeholder, icon, suffix }: any) => (
+// 1. تحديث المكون الفرعي ليدعم التغيير في القيمة
+const InputGroup = ({ label, name, type, placeholder, icon, suffix, value, onChange }: any) => (
   <div className="space-y-2.5">
     <label className="block text-sm font-bold text-slate-700 px-1 text-right">
       {label}
@@ -19,6 +19,8 @@ const InputGroup = ({ label, name, type, placeholder, icon, suffix }: any) => (
         name={name}
         type={type}
         required
+        value={value}
+        onChange={onChange}
         placeholder={placeholder}
         className="block w-full pr-12 pl-4 py-4 bg-slate-50/50 border border-slate-100 text-slate-900 rounded-2xl outline-none focus:bg-white focus:border-emerald-500 focus:ring-[6px] focus:ring-emerald-500/5 transition-all placeholder:text-slate-400 font-medium text-sm md:text-base text-right"
       />
@@ -33,19 +35,43 @@ const InputGroup = ({ label, name, type, placeholder, icon, suffix }: any) => (
   </div>
 );
 
-// 2. التصدير الافتراضي للمكون الرئيسي
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  // حالة كلمة المرور والشروط
+  const [password, setPassword] = useState("");
+  const [validations, setValidations] = useState({
+    minLength: false,
+    hasUpper: false,
+    hasNumber: false,
+  });
 
-  async function handleAction(formData: FormData) {
+  // تحديث الشروط عند كتابة كلمة المرور
+  useEffect(() => {
+    setValidations({
+      minLength: password.length >= 8,
+      hasUpper: /[A-Z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+    });
+  }, [password]);
+
+  const isPasswordValid = validations.minLength && validations.hasUpper && validations.hasNumber;
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault(); // منع التحديث الافتراضي للصفحة
+    
+    if (!isPasswordValid) return;
+
     setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    
     try {
       const res = await registerRestaurant(formData);
       if (res?.success) {
         setSuccess(true);
       } else {
-        alert("حدث خطأ أثناء التسجيل، يرجى المحاولة مرة أخرى");
+        alert(res?.error || "حدث خطأ أثناء التسجيل");
       }
     } catch (error) {
       alert("عذراً، حدث خطأ في الاتصال");
@@ -57,15 +83,14 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 text-center " dir="rtl">
-        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] max-w-md w-full animate-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <div className="bg-white p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-xl max-w-md w-full">
+          <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 size={42} strokeWidth={2.5} />
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4 tracking-tight">تم إنشاء الحساب!</h2>
-          <p className="text-slate-500 mb-10 font-medium leading-relaxed">مطعمك الآن جاهز للتحول الرقمي. يمكنك البدء فوراً.</p>
-          <Link href="/login" className="flex items-center justify-center gap-3 w-full py-4.5 bg-slate-900 text-white font-black rounded-2xl hover:bg-emerald-600 transition-all active:scale-95 shadow-xl shadow-slate-200 group">
+          <h2 className="text-2xl font-black text-slate-900 mb-4">تم إنشاء الحساب!</h2>
+          <Link href="/login" className="flex items-center justify-center gap-3 w-full py-4 bg-slate-900 text-white font-black rounded-2xl">
             تسجيل الدخول
-            <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+            <ChevronLeft size={20} />
           </Link>
         </div>
       </div>
@@ -73,57 +98,60 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-8 md:py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden" dir="rtl">
-      {/* Decorative Background */}
-      <div className="absolute top-[-10%] right-[-10%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-emerald-100/40 blur-[120px] rounded-full -z-10 animate-pulse" />
-      
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-8 px-4 relative overflow-hidden" dir="rtl">
       <div className="w-full max-w-3xl mx-auto relative z-10">
-        <div className="flex justify-start mb-6 md:mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 transition-all group text-sm font-bold bg-white/80 backdrop-blur-md px-5 py-2.5 rounded-full shadow-sm border border-slate-100">
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            العودة للرئيسية
-          </Link>
-        </div>
-
-        <div className="text-center mb-8">
-          <div className="inline-flex w-16 h-16 bg-emerald-500 rounded-[1.25rem] items-center justify-center text-white mb-6 shadow-xl shadow-emerald-200 rotate-12">
-            <Store size={32} strokeWidth={2.5} />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-3 tracking-tight">انضم إلى QR-Pro</h2>
-          <p className="text-slate-500 font-medium max-w-sm mx-auto">ابدأ رحلتك الرقمية الآن</p>
-        </div>
-
-        <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2.5rem] p-6 md:p-12 shadow-[0_25px_80px_-20px_rgba(0,0,0,0.06)]">
-          <form action={handleAction} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+         <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 transition-all mb-8 group text-sm font-bold bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  العودة للرئيسية
+                </Link>
+        <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2.5rem] p-6 md:p-12 shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="اسم المنشأة" name="name" type="text" placeholder="مطعم السعادة" icon={<Store size={20} />} />
               <InputGroup label="البريد الإلكتروني" name="email" type="email" placeholder="admin@store.com" icon={<Mail size={20} />} />
               <InputGroup label="رابط المنيو" name="slug" type="text" placeholder="my-store" icon={<Globe size={20} />} suffix=".menux.com" />
               <InputGroup label="رقم الواتساب" name="whatsapp" type="tel" placeholder="9665xxxxxxxx" icon={<Phone size={20} />} />
-              <div className="md:col-span-2">
-                <InputGroup label="كلمة المرور" name="password" type="password" placeholder="••••••••" icon={<Lock size={20} />} />
+              
+              <div className="md:col-span-2 space-y-3">
+                <InputGroup 
+                  label="كلمة المرور" 
+                  name="password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  icon={<Lock size={20} />}
+                  value={password}
+                  onChange={(e: any) => setPassword(e.target.value)}
+                />
+                
+                {/* عرض الشروط بشكل مبسط */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 px-2">
+                  <Condition met={validations.minLength} text="8 أحرف" />
+                  <Condition met={validations.hasUpper} text="حرف كبير" />
+                  <Condition met={validations.hasNumber} text="رقم" />
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 transition-all shadow-2xl shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] mt-4"
+              disabled={loading || !isPasswordValid}
+              className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-all mt-4"
             >
-              {loading ? <><Loader2 className="animate-spin" size={22} /> جاري المعالجة...</> : <>إنشاء الحساب <ChevronLeft size={22} /></>}
+              {loading ? <Loader2 className="animate-spin" size={22} /> : "إنشاء الحساب"}
             </button>
           </form>
-
-          <div className="mt-8 text-center pt-6 border-t border-slate-50">
-            <p className="text-slate-500 font-medium text-sm">
-              لديك حساب؟{" "}
-              <Link href="/login" className="text-emerald-600 font-black hover:text-emerald-700 transition-colors underline underline-offset-8">
-                سجل دخولك
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// مكون فرعي صغير للشروط
+function Condition({ met, text }: { met: boolean; text: string }) {
+  return (
+    <div className={`flex items-center gap-2 text-xs font-bold transition-colors ${met ? "text-emerald-600" : "text-slate-400"}`}>
+      <div className={`w-2 h-2 rounded-full ${met ? "bg-emerald-500" : "bg-slate-200"}`} />
+      {text}
     </div>
   );
 }

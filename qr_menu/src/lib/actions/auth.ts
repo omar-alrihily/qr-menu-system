@@ -8,6 +8,8 @@ import crypto from "crypto";
 /**
  * تسجيل مطعم جديد مع تفعيل فترة تجربة 30 يوماً تلقائياً
  */
+// داخل دالة registerRestaurant في ملف lib/actions/auth.ts
+
 export async function registerRestaurant(formData: FormData) {
   try {
     await dbConnect();
@@ -15,19 +17,22 @@ export async function registerRestaurant(formData: FormData) {
     const email = (formData.get("email") as string).toLowerCase();
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
+    const slug = (formData.get("slug") as string).toLowerCase(); // تحويل الرابط لصغير
     const whatsapp = formData.get("whatsapp") as string;
 
-    // تحقق من وجود الحساب مسبقاً
-    const existing = await Restaurant.findOne({ email });
-    if (existing) return { success: false, message: "البريد الإلكتروني مسجل مسبقاً" };
+    // 1. تحقق من البريد الإلكتروني
+    const existingEmail = await Restaurant.findOne({ email });
+    if (existingEmail) return { success: false, error: "هذا البريد الإلكتروني مسجل مسبقاً" };
+
+    // 2. تحقق من الرابط (Slug) - هامة جداً لمنع تكرار الروابط
+    const existingSlug = await Restaurant.findOne({ slug });
+    if (existingSlug) return { success: false, error: "رابط المنيو هذا محجوز بالفعل، اختر اسماً آخر" };
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // --- منطق الاشتراك الجديد ---
     const TRIAL_DAYS = 30;
     const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS); // إضافة 30 يوم من تاريخ اليوم
+    trialEndsAt.setDate(trialEndsAt.getDate() + TRIAL_DAYS);
 
     await Restaurant.create({
       name,
@@ -35,7 +40,6 @@ export async function registerRestaurant(formData: FormData) {
       password: hashedPassword,
       slug,
       whatsapp,
-      // الحقول الجديدة التي أضفناها للـ Schema
       plan: 'free',
       subscriptionStatus: 'trial',
       trialEndsAt: trialEndsAt,
@@ -45,7 +49,7 @@ export async function registerRestaurant(formData: FormData) {
     return { success: true };
   } catch (error) {
     console.error("Register Error:", error);
-    return { success: false, message: "حدث خطأ أثناء الإنشاء، تأكد من البيانات" };
+    return { success: false, error: "حدث خطأ أثناء الإنشاء، يرجى التأكد من البيانات" };
   }
 }
 

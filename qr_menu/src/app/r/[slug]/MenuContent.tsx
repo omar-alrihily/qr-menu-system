@@ -79,7 +79,7 @@ export default function MenuContent({ categories, products, restaurant }: any) {
               <div className="flex items-center gap-4 mb-6">
                 <div style={{ backgroundColor: 'var(--primary-color)' }} className="w-1.5 h-6 rounded-full" />
                 <h2 style={{ color: 'var(--text-main)' }} className="text-xl font-black">{cat.name_ar}</h2>
-                <div className="flex-1 h-[1px] bg-gradient-to-l from-gray-100 to-transparent" />
+                <div className="flex-1 h-[4px] bg-gradient-to-l from-gray-100 to-transparent" />
               </div>
               <div className="grid gap-5">
                 {catProducts.map((product: any) => {
