@@ -21,12 +21,12 @@ export const metadata: Metadata = {
   viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
   alternates: {
-    canonical: "https://flexmenu.sa", // ضع رابط موقعك الحقيقي هنا
+    canonical: "https://www.flexm.pro", // ضع رابط موقعك الحقيقي هنا
   },
   openGraph: {
     type: "website",
     locale: "ar_SA",
-    url: "https://flexmenu.sa",
+    url: "https://www.flexm.pro",
     title: "فليكس منيو | ابدأ التحول الرقمي لمطعمك",
     description: "أقوى نظام منيو تفاعلي في السعودية، جربه الآن مجاناً.",
     siteName: "FlexMenu",
