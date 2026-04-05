@@ -109,7 +109,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="اسم المنشأة" name="name" type="text" placeholder="مطعم السعادة" icon={<Store size={20} />} />
               <InputGroup label="البريد الإلكتروني" name="email" type="email" placeholder="admin@store.com" icon={<Mail size={20} />} />
-              <InputGroup label="رابط المنيو" name="slug" type="text" placeholder="my-store" icon={<Globe size={20} />} suffix=".menux.com" />
+              <InputGroup label="رابط المنيو" name="slug" type="text" placeholder="my-store" icon={<Globe size={20} />} suffix=".flexm.pro" />
               <InputGroup label="رقم الواتساب" name="whatsapp" type="tel" placeholder="9665xxxxxxxx" icon={<Phone size={20} />} />
               
               <div className="md:col-span-2 space-y-3">
