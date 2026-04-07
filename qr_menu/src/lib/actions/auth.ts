@@ -120,7 +120,7 @@ export async function forgotPassword(email: string) {
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password/${resetToken}`;
 
     const { error } = await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: 'Reset Password <noreply@flexm.pro>',
       to: user.email,
       subject: 'إعادة تعيين كلمة المرور - منصة مرغوب',
       html: `
