@@ -126,7 +126,7 @@ export async function forgotPassword(email: string) {
       html: `
         <div dir="rtl" style="font-family: sans-serif;">
           <h2>طلب إعادة تعيين كلمة المرور</h2>
-          <p>لقد طلبت إعادة تعيين كلمة المرور لحسابك في منصة مرغوب.</p>
+          <p>لقد طلبت إعادة تعيين كلمة المرور لحسابك في فليكس منيو.</p>
           <a href="${resetUrl}" style="background: #000; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">إعادة تعيين كلمة المرور</a>
         </div>
       `
