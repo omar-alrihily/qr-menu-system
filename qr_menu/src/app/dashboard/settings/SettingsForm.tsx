@@ -38,7 +38,7 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
 
   const getWhatsAppLink = () => {
     const message = `مرحباً، أرغب في تجديد اشتراكي في فليكس منيو.%0Aاسم المطعم: ${restaurant.name}%0Aالبريد: ${restaurant.email}`;
-    return `https://wa.me/9665XXXXXXXX?text=${message}`; 
+    return `https://wa.me/966549262671?text=${message}`; 
   };
 
   const resetToDefaults = () => {

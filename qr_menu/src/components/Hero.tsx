@@ -34,10 +34,14 @@ export default function Hero() {
               أنشئ قائمتك الآن
               <ArrowLeft className="w-6 h-6" />
             </Link>
-            <button className="w-full sm:w-auto px-14 py-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-[2rem] font-bold text-xl hover:bg-white transition-all flex items-center justify-center gap-2">
-              <Zap size={20} className="text-amber-500 fill-amber-500" />
-              تجربة حية
-            </button>
+            <Link 
+  href="https://www.flexm.pro/r/bu1" 
+  target="_blank" 
+  className="w-full sm:w-auto px-14 py-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-[2rem] font-bold text-xl hover:bg-white transition-all flex items-center justify-center gap-2"
+>
+  <Zap size={20} className="text-amber-500 fill-amber-500" />
+  تجربة حية
+</Link>
           </div>
         </div>
       </section>
