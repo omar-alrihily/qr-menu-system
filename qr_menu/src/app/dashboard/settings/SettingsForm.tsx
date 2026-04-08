@@ -25,17 +25,20 @@ const defaultColors = {
 export default function SettingsForm({ restaurant, subStatus }: { restaurant: any, subStatus: any }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [showCover, setShowCover] = useState(restaurant?.show_cover !== false);
+
+  // التعديل 1: تغيير القيمة الافتراضية لتكون false (مخفية)
+  const [showCover, setShowCover] = useState(restaurant?.show_cover === true);
 
   useEffect(() => {
     if (restaurant) {
-      setShowCover(restaurant.show_cover !== false);
+      // التعديل 2: التأكد من قراءة القيمة من الداتابيز وإلا تكون false
+      setShowCover(restaurant.show_cover === true);
     }
   }, [restaurant?.show_cover]);
 
   const getWhatsAppLink = () => {
-    const message = `مرحباً، أرغب في تجديد اشتراكي في منصة مرغوب.%0Aاسم المطعم: ${restaurant.name}%0Aالبريد: ${restaurant.email}`;
-    return `https://wa.me/9665XXXXXXXX?text=${message}`; // استبدل X برقمك
+    const message = `مرحباً، أرغب في تجديد اشتراكي في فليكس منيو.%0Aاسم المطعم: ${restaurant.name}%0Aالبريد: ${restaurant.email}`;
+    return `https://wa.me/9665XXXXXXXX?text=${message}`; 
   };
 
   const resetToDefaults = () => {
@@ -51,9 +54,10 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
   };
 
   return (
-    <div className="space-y-10">
+    // التعديل 3: إضافة pb-24 لضمان وجود مساحة كافية للتمرير فوق منيو الجوال
+    <div className="space-y-10 pb-24">
       
-      {/* 1. قسم حالة الاشتراك فقط في الأعلى */}
+      {/* 1. قسم حالة الاشتراك */}
       <div className={`p-6 rounded-3xl border-2 transition-all ${subStatus?.allowed ? 'border-emerald-100 bg-emerald-50/30' : 'border-red-100 bg-red-50/30'}`}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-4">
@@ -83,7 +87,6 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
         </div>
       </div>
 
-      {/* 2. الفورم الأصلي الخاص بك كما هو تماماً */}
       <form
         action={async (fd) => {
           setLoading(true);
@@ -160,7 +163,7 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
                 </div>
               ) : (
                 <div className="text-center opacity-60">
-                  <p className="text-[10px] text-gray-400 max-w-[150px]">الغلاف معطل</p>
+                  <p className="text-[10px] text-gray-400 max-w-[150px]">الغلاف معطل حالياً</p>
                 </div>
               )}
             </div>
@@ -208,19 +211,20 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
           <div className="space-y-1">
             <label className="block text-sm font-bold text-gray-700 mr-2">رقم الواتساب للطلبات</label>
             <input name="whatsapp" defaultValue={restaurant?.whatsapp || ""} placeholder="9665xxxxxxxx" className="w-full p-4 bg-white border border-gray-200 rounded-2xl outline-none focus:border-orange-500 transition-all text-left" required />
-            
-            {/* إبقاء الـ slug كحقل مخفي لضمان تحديث البيانات بشكل صحيح */}
             <input type="hidden" name="slug" value={restaurant?.slug} />
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={`w-full py-5 rounded-[2rem] font-black text-lg transition-all transform active:scale-[0.98] ${loading ? 'bg-gray-300' : 'bg-green-600 hover:bg-green-700 text-white shadow-xl shadow-orange-100'}`}
-        >
-          {loading ? "جاري الحفظ..." : "حفظ التعديلات"}
-        </button>
+        {/* التعديل 4: تحسين الزر ليكون واضحاً دائماً */}
+        <div className="sticky bottom-20 z-10 sm:static sm:pb-0">
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={`w-full py-5 rounded-[2rem] font-black text-lg transition-all transform active:scale-[0.95] shadow-2xl ${loading ? 'bg-gray-300' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+          >
+            {loading ? "جاري الحفظ..." : "حفظ التعديلات"}
+          </button>
+        </div>
       </form>
     </div>
   );
