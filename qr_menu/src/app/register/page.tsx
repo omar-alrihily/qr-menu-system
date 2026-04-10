@@ -132,13 +132,24 @@ export default function RegisterPage() {
               </div>
             </div>
 
+
+            {/* حقل Honeypot لحماية الموقع من البوتات - مخفي تماماً */}
+          <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
+             <input 
+               type="text" 
+               name="confirm_restaurant_email_field" 
+               tabIndex={-1} 
+             autoComplete="off" 
+                          />
+                </div>
+
             <button
-              type="submit"
-              disabled={loading || !isPasswordValid}
-              className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-all mt-4"
-            >
-              {loading ? <Loader2 className="animate-spin" size={22} /> : "إنشاء الحساب"}
-            </button>
+  type="submit"
+  disabled={loading || !isPasswordValid}
+  className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-all mt-4"
+>
+  {loading ? <Loader2 className="animate-spin" size={22} /> : "إنشاء الحساب"}
+</button>
           </form>
         </div>
       </div>

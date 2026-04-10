@@ -13,21 +13,31 @@ import crypto from "crypto";
 export async function registerRestaurant(formData: FormData) {
   try {
     await dbConnect();
-    
+
+    // 1. فحص الفخ (Honeypot Check)
+    // إذا كان هذا الحقل ممتلئاً، فهذا يعني أن بوتاً قام بتعبئة الفورم آلياً
+    const honeyField = formData.get("confirm_restaurant_email_field");
+    if (honeyField && honeyField.toString().length > 0) {
+      console.warn("Bot registration attempt blocked via Honeypot.");
+      // نعيد نجاح وهمي لإيهام البوت بأن عمليته تمت بنجاح فلا يكرر المحاولة
+      return { success: true }; 
+    }
+
     const email = (formData.get("email") as string).toLowerCase();
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
-    const slug = (formData.get("slug") as string).toLowerCase(); // تحويل الرابط لصغير
+    const slug = (formData.get("slug") as string).toLowerCase(); 
     const whatsapp = formData.get("whatsapp") as string;
 
-    // 1. تحقق من البريد الإلكتروني
+    // 2. تحقق من البريد الإلكتروني
     const existingEmail = await Restaurant.findOne({ email });
     if (existingEmail) return { success: false, error: "هذا البريد الإلكتروني مسجل مسبقاً" };
 
-    // 2. تحقق من الرابط (Slug) - هامة جداً لمنع تكرار الروابط
+    // 3. تحقق من الرابط (Slug)
     const existingSlug = await Restaurant.findOne({ slug });
     if (existingSlug) return { success: false, error: "رابط المنيو هذا محجوز بالفعل، اختر اسماً آخر" };
 
+    // تشفير كلمة المرور (عملية تستهلك موارد السيرفر، لذا فحص البوت قبلها مهم جداً)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const TRIAL_DAYS = 30;
@@ -52,7 +62,6 @@ export async function registerRestaurant(formData: FormData) {
     return { success: false, error: "حدث خطأ أثناء الإنشاء، يرجى التأكد من البيانات" };
   }
 }
-
 /**
  * دالة للتحقق من صلاحية اشتراك المطعم (سنستخدمها في لوحة التحكم والمنيو)
  */
@@ -100,45 +109,69 @@ export async function checkSubscriptionStatus(restaurantId: string) {
 // --- بقية الدوال (إعادة تعيين كلمة المرور) تبقى كما هي ---
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function forgotPassword(email: string) {
   try {
     await dbConnect();
     const user = await Restaurant.findOne({ email: email.toLowerCase() });
 
+    // 1. الأمان: لا تخبر البوت إذا كان الإيميل موجوداً أم لا
     if (!user) {
       return { success: true, message: "إذا كان البريد مسجلاً، ستصلك رسالة قريباً" };
+    }
+
+    // 2. حماية من الإغراق (Rate Limiting):
+    // إذا كان هناك توكن تم إنشاؤه ولم تمر عليه ساعة، لا ترسل إيميل جديد
+    const now = new Date();
+    if (user.resetPasswordExpires && user.resetPasswordExpires > now) {
+      // نحسب الفرق بالدقائق لنعرف متى طلب الإيميل الأخير
+      const diffInMinutes = Math.floor((user.resetPasswordExpires.getTime() - now.getTime()) / 60000);
+      
+      // إذا كان الوقت المتبقي أكثر من 0، فهذا يعني أن هناك طلب نشط حالياً
+      // نرجع نجاح وهمي لنخدع البوت ونحمي السيرفر
+      if (diffInMinutes > 0) {
+        return { success: true, message: "إذا كان البريد مسجلاً، ستصلك رسالة قريباً" };
+      }
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
+    // تحديث التوكن ووقت انتهاء الصلاحية (ساعة واحدة من الآن)
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpires = new Date(Date.now() + 3600000); 
     await user.save();
 
     const resetUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password/${resetToken}`;
 
+    // 3. إرسال الإيميل عبر Resend
     const { error } = await resend.emails.send({
       from: 'Reset Password <noreply@flexm.pro>',
       to: user.email,
-      subject: 'إعادة تعيين كلمة المرور - منصة مرغوب',
+      subject: 'إعادة تعيين كلمة المرور - فليكس منيو', // عدلت الاسم ليتناسب مع مشروعك الحالي
       html: `
-        <div dir="rtl" style="font-family: sans-serif;">
-          <h2>طلب إعادة تعيين كلمة المرور</h2>
-          <p>لقد طلبت إعادة تعيين كلمة المرور لحسابك في فليكس منيو.</p>
-          <a href="${resetUrl}" style="background: #000; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">إعادة تعيين كلمة المرور</a>
+        <div dir="rtl" style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #333;">طلب إعادة تعيين كلمة المرور</h2>
+          <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور لحسابك في <strong>فليكس منيو</strong>.</p>
+          <p>إذا لم تكن أنت من قام بهذا الطلب، يرجى تجاهل هذا الإيميل.</p>
+          <div style="margin: 30px 0;">
+            <a href="${resetUrl}" style="background: #0f172a; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 12px; font-weight: bold;">إعادة تعيين كلمة المرور</a>
+          </div>
+          <p style="font-size: 12px; color: #666;">هذا الرابط صالح لمدة ساعة واحدة فقط.</p>
         </div>
       `
     });
 
-    if (error) return { success: false, message: "فشل إرسال البريد الإلكتروني" };
+    if (error) {
+      console.error("Resend Error:", error);
+      return { success: false, message: "فشل إرسال البريد الإلكتروني" };
+    }
+
     return { success: true, message: "تم إرسال الرابط بنجاح" };
   } catch (error) {
+    console.error("Forgot Password Error:", error);
     return { success: false, message: "حدث خطأ غير متوقع" };
   }
 }
-
 export async function resetPassword(token: string, newPassword: string) {
   try {
     await dbConnect();
