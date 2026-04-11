@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     siteName: "FlexMenu",
   },
   icons: {
-    icon: '/favicon.svg', // المسار من مجلد public
+    icon: '/favicon.png', // المسار من مجلد public
     // يمكنك إضافة أحجام مختلفة أيضاً
     apple: '/apple-touch-icon.png',
   },
