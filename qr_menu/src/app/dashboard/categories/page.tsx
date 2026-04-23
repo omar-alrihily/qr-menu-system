@@ -22,7 +22,7 @@ export default async function CategoriesPage() {
         <table className="w-full text-right">
           <thead className="bg-gray-50 border-b border-gray-100 text-gray-600">
             <tr>
-              <th className="p-4">الاسم (عربي/إنجليزي)</th>
+              <th className="p-4">الاسم (عربي)</th>
               <th className="p-4 text-center">الترتيب</th>
               <th className="p-4 text-center">الإجراءات</th>
             </tr>

@@ -64,10 +64,7 @@ export default function EditProductModal({ product, categories }: { product: any
                 <input name="name_ar" defaultValue={product.name_ar} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required />
               </div>
 
-              <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">الاسم بالإنجليزي</label>
-                <input name="name_en" defaultValue={product.name_en} className="w-full p-2 border rounded-lg text-left focus:ring-2 focus:ring-blue-500" required />
-              </div>
+              
 
               {/* حقل السعرات الحرارية الجديد */}
               <div className="col-span-1">

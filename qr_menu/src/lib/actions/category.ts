@@ -14,7 +14,7 @@ export async function createCategory(formData: FormData) {
   await Category.create({
     restaurant_id: session.user.id,
     name_ar: formData.get("name_ar"),
-    name_en: formData.get("name_en"),
+    
     sort_order: Number(formData.get("sort_order")) || 0,
   });
 
@@ -32,7 +32,7 @@ export async function updateCategory(id: string, formData: FormData) {
     { _id: id, restaurant_id: session.user.id },
     {
       name_ar: formData.get("name_ar"),
-      name_en: formData.get("name_en"),
+      
       sort_order: Number(formData.get("sort_order")) || 0,
     }
   );

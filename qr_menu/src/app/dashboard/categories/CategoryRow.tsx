@@ -14,7 +14,7 @@ export default function CategoryRow({ category }: { category: any }) {
             setIsEditing(false);
           }} className="flex gap-4 items-center">
             <input name="name_ar" defaultValue={category.name_ar} className="flex-1 p-2 border rounded" required />
-            <input name="name_en" defaultValue={category.name_en} className="flex-1 p-2 border rounded text-left" required />
+            
             <input name="sort_order" type="number" defaultValue={category.sort_order} className="w-20 p-2 border rounded" />
             <button type="submit" className="text-green-600 font-bold px-3">حفظ</button>
             <button type="button" onClick={() => setIsEditing(false)} className="text-gray-400">إلغاء</button>
@@ -28,7 +28,7 @@ export default function CategoryRow({ category }: { category: any }) {
     <tr className="border-b border-gray-50 hover:bg-gray-50 transition">
       <td className="p-4">
         <div className="font-medium text-gray-800">{category.name_ar}</div>
-        <div className="text-xs text-gray-400 font-mono">{category.name_en}</div>
+        
       </td>
       <td className="p-4 text-center">{category.sort_order}</td>
       <td className="p-4 text-center flex justify-center gap-4">

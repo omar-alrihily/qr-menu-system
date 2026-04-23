@@ -47,9 +47,9 @@ export async function createProduct(formData: FormData) {
       restaurant_id: session.user.id,
       category_id: formData.get("category_id"),
       name_ar: formData.get("name_ar"),
-      name_en: formData.get("name_en"),
+      
       description_ar: formData.get("description_ar"),
-      description_en: formData.get("description_en"),
+      
       calories: Number(formData.get("calories")) || 0,
       allergens: formData.getAll("allergens"), // لاستقبال عدة قيم من الـ Checkboxes
       price: Number(formData.get("price")),
@@ -91,9 +91,9 @@ export async function updateProduct(id: string, formData: FormData) {
     await Product.findByIdAndUpdate(id, {
       category_id: formData.get("category_id"),
       name_ar: formData.get("name_ar"),
-      name_en: formData.get("name_en"),
+      
       description_ar: formData.get("description_ar"),
-      description_en: formData.get("description_en"),
+      
       calories: Number(formData.get("calories")) || 0,
       allergens: formData.getAll("allergens"),
       price: Number(formData.get("price")),

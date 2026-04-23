@@ -64,15 +64,12 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 />
               </div>
 
-              <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">الاسم بالعربي</label>
-                <input name="name_ar" placeholder="مثلاً: كبسة دجاج" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" required />
-              </div>
+              <div className="col-span-2">
+  <label className="block text-sm font-medium text-gray-700 mb-1">اسم المنتج</label>
+  <input name="name_ar" placeholder="مثلاً: كبسة دجاج" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" required />
+</div>
 
-              <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">الاسم بالإنجليزي</label>
-                <input name="name_en" placeholder="Chicken Kabsa" className="w-full p-2 border rounded-lg text-left focus:ring-2 focus:ring-green-500" required />
-              </div>
+              
               
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">وصف المنتج (عربي)</label>

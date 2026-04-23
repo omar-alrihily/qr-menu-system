@@ -54,15 +54,7 @@ export default function AddCategoryModal() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 text-right">الاسم بالإنجليزي (English Name)</label>
-                <input
-                  name="name_en"
-                  required
-                  placeholder="Example: Italian Pizza"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-left"
-                />
-              </div>
+              
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">ترتيب الظهور</label>
