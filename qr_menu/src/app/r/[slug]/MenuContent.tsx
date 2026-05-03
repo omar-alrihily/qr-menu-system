@@ -203,22 +203,32 @@ const closeModal = () => {
 
                           {productQtyInCart > 0 ? (
   <div onClick={(e) => e.stopPropagation()} className="flex items-center bg-gray-900/95 backdrop-blur-sm rounded-2xl p-1 shadow-lg transform scale-105 transition-transform">
-    {/* زر الناقص: سيقوم بحذف قطعة واحدة من أول ظهور للمنتج في السلة */}
+    {/* زر الناقص (كما هو مع تحديث الـ uniqueId الذي ناقشناه سابقاً) */}
     <button 
-      onClick={() => handleRemoveSpecificProduct(product._id)}
+      onClick={() => {
+        const itemInCart = [...cart].reverse().find(i => i._id === product._id);
+        if (itemInCart) removeFromCart(itemInCart.uniqueId);
+      }} 
       className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-colors"
     >
       <Minus size={14} strokeWidth={3} />
     </button>
     
-    {/* يعرض إجمالي القطع من هذا الصنف في السلة */}
     <span className="text-white font-bold px-2 min-w-[24px] text-center text-sm">
       {productQtyInCart}
     </span>
     
-    {/* زر الزائد: يفتح المودال لاختيار الإضافات أو تأكيد الإضافة */}
+    {/* زر الزائد الجديد المحدث */}
     <button 
-      onClick={() => setSelectedProduct(product)} 
+      onClick={() => {
+        // إذا كان للمنتج خيارات (إضافات)، افتح المودال
+        if (product.options && product.options.length > 0) {
+          setSelectedProduct(product);
+        } else {
+          // إذا لا توجد خيارات، أضف للسلة مباشرة
+          addToCart(product);
+        }
+      }} 
       style={{ backgroundColor: 'var(--primary-color)' }} 
       className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-inner active:scale-90 transition-transform"
     >
@@ -226,10 +236,10 @@ const closeModal = () => {
     </button>
   </div>
 ) : (
+  /* هذا الزر يظهر عندما لا يكون المنتج في السلة أصلاً */
   <button 
     onClick={(e) => {
       e.stopPropagation();
-      // إذا كان المنتج له إضافات، افتح المودال. إذا لم يكن له، أضفه مباشرة
       if (product.options && product.options.length > 0) {
         setSelectedProduct(product);
       } else {
