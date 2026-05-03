@@ -144,11 +144,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 </p>
               </div>
               <Link 
-                href="/dashboard/settings" 
-                className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
-              >
-                تجديد الاشتراك الآن
-              </Link>
+  href="https://wa.me/966549262671" 
+  target="_blank" 
+  className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black hover:bg-emerald-600 transition-all shadow-xl shadow-slate-200"
+>
+  تجديد الاشتراك الآن
+</Link>
             </div>
           )}
         </main>

@@ -6,7 +6,23 @@ export default function EditProductModal({ product, categories }: { product: any
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // قائمة مسببات الحساسية المتاحة
+  // --- الحالة الخاصة بالإضافات الاختيارية (تبدأ بالخيارات الحالية للمنتج) ---
+  const [options, setOptions] = useState<{ name: string; price: number }[]>(product.options || []);
+
+  const addOption = () => setOptions([...options, { name: "", price: 0 }]);
+  
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const updateOptionValue = (index: number, field: "name" | "price", value: string | number) => {
+    const newOptions = [...options];
+    if (field === "name") newOptions[index].name = value as string;
+    if (field === "price") newOptions[index].price = Number(value);
+    setOptions(newOptions);
+  };
+  // -------------------------------------------------------------------
+
   const allergenOptions = [
     { id: 'nuts', label: 'مكسرات' },
     { id: 'milk', label: 'ألبان' },
@@ -32,8 +48,10 @@ export default function EditProductModal({ product, categories }: { product: any
             
             <form action={async (fd) => { 
                 setLoading(true);
+                // إلحاق الإضافات كـ JSON بالـ FormData
+                fd.append("options", JSON.stringify(options));
+                
                 try {
-                  // تحديث: نمرر الـ ID مع الـ FormData التي ستحتوي الآن على الحقول الجديدة تلقائياً
                   const res = await updateProduct(product._id, fd);
                   if(res?.success) {
                     setIsOpen(false);
@@ -45,6 +63,7 @@ export default function EditProductModal({ product, categories }: { product: any
                 }
               }} className="grid grid-cols-2 gap-4 text-right">
               
+              {/* الحقول الحالية */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">القسم الرئيسي</label>
                 <select name="category_id" defaultValue={product.category_id} required className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
@@ -66,23 +85,71 @@ export default function EditProductModal({ product, categories }: { product: any
 
               
 
-              {/* حقل السعرات الحرارية الجديد */}
               <div className="col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">السعرات الحرارية</label>
-                <input 
-                  name="calories" 
-                  type="number" 
-                  defaultValue={product.calories || 0} 
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500" 
+                <input name="calories" type="number" defaultValue={product.calories || 0} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500" />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">وصف المنتج</label>
+                <textarea 
+                  name="description_ar" 
+                  defaultValue={product.description_ar} 
+                  placeholder="اكتب وصفاً للمنتج..." 
+                  rows={3}
+                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-right"
                 />
               </div>
 
               <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">السعر</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">السعر الأساسي</label>
                 <input name="price" type="number" step="0.01" defaultValue={product.price} className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required />
               </div>
 
-              {/* حقل مسببات الحساسية الجديد */}
+              {/* قسم تعديل الإضافات الاختيارية */}
+              <div className="col-span-2 border-t pt-4 mt-2">
+                <div className="flex justify-between items-center mb-3">
+                  <label className="block text-sm font-bold text-gray-700">الإضافات الاختيارية</label>
+                  <button 
+                    type="button" 
+                    onClick={addOption}
+                    className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 transition-colors"
+                  >
+                    + إضافة خيار
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {options.map((opt, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <input 
+                        placeholder="اسم الإضافة" 
+                        value={opt.name}
+                        onChange={(e) => updateOptionValue(index, "name", e.target.value)}
+                        className="flex-1 p-2 border rounded-lg text-sm focus:border-blue-400 outline-none"
+                      />
+                      <input 
+                        type="number" 
+                        placeholder="السعر" 
+                        value={opt.price}
+                        onChange={(e) => updateOptionValue(index, "price", e.target.value)}
+                        className="w-20 p-2 border rounded-lg text-sm focus:border-blue-400 outline-none"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => removeOption(index)}
+                        className="text-red-400 hover:text-red-600 p-1"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {options.length === 0 && (
+                    <p className="text-xs text-gray-400 text-center py-2">لا توجد إضافات حالياً</p>
+                  )}
+                </div>
+              </div>
+
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">مسببات الحساسية</label>
                 <div className="grid grid-cols-3 gap-2 bg-gray-50 p-3 rounded-lg border">
@@ -95,7 +162,7 @@ export default function EditProductModal({ product, categories }: { product: any
                         defaultChecked={product.allergens?.includes(option.id)}
                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <span className="text-xs text-gray-600 group-hover:text-blue-600 transition-colors">{option.label}</span>
+                      <span className="text-xs text-gray-600 group-hover:text-blue-600">{option.label}</span>
                     </label>
                   ))}
                 </div>

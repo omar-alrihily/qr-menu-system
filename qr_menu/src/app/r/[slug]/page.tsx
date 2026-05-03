@@ -122,9 +122,7 @@ export default async function PublicMenuPage({ params }: { params: Promise<{ slu
               style={{ color: 'var(--text-sub)' }}
               className="flex flex-wrap justify-center items-center gap-4 text-[11px] font-bold uppercase tracking-wide"
             >
-              <span className="flex items-center gap-1.5">
-                <MapPin size={14} style={{ color: 'var(--primary-color)' }} />  المملكة العربية السعودية
-              </span>
+              
             </div>
             <div className="grid grid-cols-2 gap-0 w-full mt-6 pt-6 border-t border-gray-100/80"></div>
           </div>

@@ -7,7 +7,11 @@ import { Plus, Minus, ShoppingBag, X, Trash2, ChevronLeft, Truck, Store, Utensil
 export default function MenuContent({ categories, products, restaurant }: any) {
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
+  const [modalQty, setModalQty] = useState(1);
+
+
   const [orderStep, setOrderStep] = useState(1);
   const [deliveryType, setDeliveryType] = useState("");
   const [customerData, setCustomerData] = useState({
@@ -28,25 +32,81 @@ export default function MenuContent({ categories, products, restaurant }: any) {
     localStorage.setItem(`cart_${restaurant.slug}`, JSON.stringify(cart));
   }, [cart, restaurant.slug]);
 
-  const addToCart = (product: any) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item._id === product._id);
-      if (existing) {
-        return prev.map((item) => item._id === product._id ? { ...item, qty: item.qty + 1 } : item);
-      }
-      return [...prev, { ...product, qty: 1 }];
-    });
-  };
+ // 2. تحديث دالة addToCart لتقبل الكمية
+const addToCart = (product: any, chosenOptions: any[] = [], quantity: number = 1) => {
+  setCart((prev) => {
+    const optionIds = chosenOptions.map(o => o.name).sort().join(",");
+    const uniqueId = `${product._id}-${optionIds}`;
 
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.map((item) => item._id === productId ? { ...item, qty: item.qty - 1 } : item).filter((item) => item.qty > 0));
-  };
+    const existing = prev.find((item) => item.uniqueId === uniqueId);
+    
+    const optionsTotal = chosenOptions.reduce((sum, opt) => sum + Number(opt.price), 0);
+    const finalPrice = Number(product.price) + optionsTotal;
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    if (existing) {
+      return prev.map((item) => 
+        item.uniqueId === uniqueId ? { ...item, qty: item.qty + quantity } : item
+      );
+    }
+    
+    return [...prev, { ...product, uniqueId, chosenOptions, finalPrice, qty: quantity }];
+  });
+};
+
+const removeFromCart = (uniqueId: string) => { // تغيير المعامل إلى uniqueId
+  setCart((prev) => {
+    // البحث عن العنصر باستخدام المعرف الفريد
+    const index = prev.findIndex(item => item.uniqueId === uniqueId);
+    if (index === -1) return prev;
+
+    const newCart = [...prev];
+    const item = newCart[index];
+
+    if (item.qty > 1) {
+      // تنقيص الكمية
+      newCart[index] = { ...item, qty: item.qty - 1 };
+    } else {
+      // حذف العنصر تماماً من السلة
+      newCart.splice(index, 1);
+    }
+    return newCart;
+  });
+};
+// ابحث عن آخر عنصر تم إضافته لهذا المنتج تحديداً
+const handleRemoveSpecificProduct = (productId: string) => {
+  const itemToRemove = [...cart].reverse().find(item => item._id === productId);
+  if (itemToRemove) {
+    removeFromCart(itemToRemove.uniqueId);
+  }
+};
+
+
+  // دالة التعامل مع اختيار الإضافات في المودال
+const toggleOption = (option: any) => {
+  setSelectedOptions(prev => 
+    prev.find(o => o.name === option.name) 
+      ? prev.filter(o => o.name !== option.name)
+      : [...prev, option]
+  );
+};
+
+// 3. تعديل زر الإغلاق ليعيد ضبط الكمية
+const closeModal = () => {
+  setSelectedProduct(null);
+  setSelectedOptions([]);
+  setModalQty(1);
+};
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
   const sendWhatsAppOrder = () => {
-    const orderText = cart.map((item) => `• *${item.name_ar}* (العدد: ${item.qty})`).join("\n");
+    const orderText = cart.map((item) => {
+  const opts = item.chosenOptions?.length > 0 
+    ? ` (إضافات: ${item.chosenOptions.map((o:any)=>o.name).join(', ')})` 
+    : "";
+  return `• *${item.name_ar}*${opts} (العدد: ${item.qty})`;
+}).join("\n");
     let deliveryInfo = "";
     if (deliveryType === "delivery") {
       deliveryInfo = `\n📍 *بيانات التوصيل:*\n- الاسم: ${customerData.name}\n- العنوان: ${customerData.address}\n- الجوال: ${customerData.phone}`;
@@ -83,10 +143,13 @@ export default function MenuContent({ categories, products, restaurant }: any) {
               </div>
               <div className="grid gap-5">
                 {catProducts.map((product: any) => {
-                  const cartItem = cart.find((item) => item._id === product._id);
+                 const productQtyInCart = cart
+  .filter((item) => item._id === product._id)
+  .reduce((total, item) => total + item.qty, 0);
                   return (
                     <div 
                       key={product._id} 
+                      onClick={() => setSelectedProduct(product)}
                       style={{ backgroundColor: 'var(--card-bg)' }}
                       className="group relative rounded-[2.5rem] p-3 flex gap-4 border border-gray-100/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-out overflow-hidden"
                     >
@@ -138,29 +201,51 @@ export default function MenuContent({ categories, products, restaurant }: any) {
                             </span>
                           </div>
 
-                          {cartItem ? (
-                            <div className="flex items-center bg-gray-900/95 backdrop-blur-sm rounded-2xl p-1 shadow-lg transform scale-105 transition-transform">
-                              <button onClick={() => removeFromCart(product._id)} className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-colors">
-                                <Minus size={14} strokeWidth={3} />
-                              </button>
-                              <span className="text-white font-bold px-2 min-w-[24px] text-center text-sm">{cartItem.qty}</span>
-                              <button onClick={() => addToCart(product)} style={{ backgroundColor: 'var(--primary-color)' }} className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-inner active:scale-90 transition-transform">
-                                <Plus size={14} strokeWidth={3} />
-                              </button>
-                            </div>
-                          ) : (
-                            <button 
-                              onClick={() => addToCart(product)} 
-                              style={{ 
-                                backgroundColor: 'var(--primary-color)',
-                                boxShadow: `0 4px 14px 0 var(--primary-color-transparent, rgba(0,0,0,0.1))` 
-                              }}
-                              className="h-10 w-10 sm:w-auto sm:px-5 rounded-2xl flex items-center justify-center gap-2 text-white font-bold transition-all active:scale-95 hover:brightness-110"
-                            >
-                              <span className="hidden sm:block text-sm">إضافة</span>
-                              <Plus size={18} strokeWidth={3} />
-                            </button>
-                          )}
+                          {productQtyInCart > 0 ? (
+  <div onClick={(e) => e.stopPropagation()} className="flex items-center bg-gray-900/95 backdrop-blur-sm rounded-2xl p-1 shadow-lg transform scale-105 transition-transform">
+    {/* زر الناقص: سيقوم بحذف قطعة واحدة من أول ظهور للمنتج في السلة */}
+    <button 
+      onClick={() => handleRemoveSpecificProduct(product._id)}
+      className="w-8 h-8 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-colors"
+    >
+      <Minus size={14} strokeWidth={3} />
+    </button>
+    
+    {/* يعرض إجمالي القطع من هذا الصنف في السلة */}
+    <span className="text-white font-bold px-2 min-w-[24px] text-center text-sm">
+      {productQtyInCart}
+    </span>
+    
+    {/* زر الزائد: يفتح المودال لاختيار الإضافات أو تأكيد الإضافة */}
+    <button 
+      onClick={() => setSelectedProduct(product)} 
+      style={{ backgroundColor: 'var(--primary-color)' }} 
+      className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-inner active:scale-90 transition-transform"
+    >
+      <Plus size={14} strokeWidth={3} />
+    </button>
+  </div>
+) : (
+  <button 
+    onClick={(e) => {
+      e.stopPropagation();
+      // إذا كان المنتج له إضافات، افتح المودال. إذا لم يكن له، أضفه مباشرة
+      if (product.options && product.options.length > 0) {
+        setSelectedProduct(product);
+      } else {
+        addToCart(product);
+      }
+    }}
+    style={{ 
+      backgroundColor: 'var(--primary-color)',
+      boxShadow: `0 4px 14px 0 var(--primary-color-transparent, rgba(0,0,0,0.1))` 
+    }}
+    className="h-10 w-10 sm:w-auto sm:px-5 rounded-2xl flex items-center justify-center gap-2 text-white font-bold transition-all active:scale-95 hover:brightness-110"
+  >
+    <span className="hidden sm:block text-sm">إضافة</span>
+    <Plus size={18} strokeWidth={3} />
+  </button>
+)}
                         </div>
                       </div>
                       <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary-color opacity-[0.03] rounded-full blur-3xl group-hover:opacity-[0.08] transition-opacity" />
@@ -172,6 +257,138 @@ export default function MenuContent({ categories, products, restaurant }: any) {
           );
         })}
       </div>
+
+      {/* --- نافذة تفاصيل المنتج --- */}
+{selectedProduct && (
+  <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-md p-4 transition-all duration-300">
+    {/* خلفية للإغلاق عند النقر خارج النافذة */}
+    <div className="absolute inset-0" onClick={() => setSelectedProduct(null)} />
+    
+    <div 
+      style={{ backgroundColor: 'var(--bg-color)' }} 
+      className="relative w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in duration-300 flex flex-col max-h-[90vh]"
+    >
+      {/* زر الإغلاق */}
+      <button 
+        onClick={() => setSelectedProduct(null)}
+        className="absolute top-5 right-5 z-20 w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 shadow-lg hover:scale-110 transition-transform"
+      >
+        <X size={20} />
+      </button>
+
+      <div className="overflow-y-auto custom-scrollbar">
+        {/* صورة المنتج */}
+        {selectedProduct.image && (
+          <div className="relative w-full h-64 shadow-inner">
+            <Image 
+              src={selectedProduct.image} 
+              alt={selectedProduct.name_ar} 
+              fill 
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          </div>
+        )}
+
+        <div className="p-7">
+          {/* العنوان والسعر */}
+          <div className="flex justify-between items-start mb-2">
+            <h2 style={{ color: 'var(--text-main)' }} className="text-2xl font-black">
+              {selectedProduct.name_ar}
+            </h2>
+            <span style={{ color: 'var(--primary-color)' }} className="text-2xl font-black">
+              {selectedProduct.price} ر.س
+            </span>
+          </div>
+
+          {/* السعرات */}
+          {selectedProduct.calories > 0 && (
+            <div className="flex items-center gap-2 mb-4 text-orange-600 bg-orange-50 w-fit px-3 py-1 rounded-full text-xs font-bold">
+              <Hash size={14} /> {selectedProduct.calories} سعرة حرارية
+            </div>
+          )}
+
+          {/* الوصف */}
+          <p style={{ color: 'var(--text-sub)' }} className="text-base leading-relaxed mb-6">
+            {selectedProduct.description_ar}
+          </p>
+
+          {/* قسم الإضافات الاختيارية (هذا الجزء الجديد) */}
+         {selectedProduct.options && selectedProduct.options.length > 0 && (
+  <div className="mb-6 bg-gray-50/50 p-4 rounded-3xl border border-gray-100">
+    <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+      <Plus size={16} className="text-green-600" /> إضافات اختيارية
+    </h4>
+    <div className="space-y-2">
+      {selectedProduct.options.map((option: any, idx: number) => {
+        const isSelected = selectedOptions.find(o => o.name === option.name);
+        return (
+          <button 
+            key={idx} 
+            onClick={() => toggleOption(option)}
+            className={`w-full flex justify-between items-center p-3 rounded-2xl border transition-all ${
+              isSelected ? 'border-green-500 bg-green-50' : 'border-gray-100 bg-white'
+            }`}
+          >
+            <span className="text-gray-700 font-medium text-sm">{option.name}</span>
+            <span className="text-gray-500 text-sm font-bold">+{option.price} ر.س</span>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+          {/* مسببات الحساسية */}
+          {selectedProduct.allergens?.length > 0 && (
+            <div className="mb-8">
+              <h4 className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">مسببات الحساسية:</h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedProduct.allergens.map((allergen: string) => (
+                  <span key={allergen} className="bg-red-50 text-red-600 px-3 py-1.5 rounded-xl text-xs font-semibold">
+                    {getAllergenLabel(allergen)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+
+
+     {/* أضف هذا الجزء قبل زر "إضافة للطلب" في أسفل المودال */}
+<div className="flex items-center justify-center gap-6 mb-4">
+  <button 
+    onClick={() => setModalQty(Math.max(1, modalQty - 1))}
+    className="w-12 h-12 rounded-full border-2 flex items-center justify-center text-gray-500"
+  >
+    <Minus size={20} />
+  </button>
+  <span className="text-2xl font-black">{modalQty}</span>
+  <button 
+    onClick={() => setModalQty(modalQty + 1)}
+    style={{ backgroundColor: 'var(--primary-color)' }}
+    className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+  >
+    <Plus size={20} />
+  </button>
+</div>
+
+{/* تحديث زر الإضافة النهائي ليستخدم الكمية modalQty */}
+<button 
+  onClick={() => {
+    addToCart(selectedProduct, selectedOptions, modalQty);
+    closeModal();
+  }}
+  style={{ backgroundColor: 'var(--primary-color)' }}
+  className="w-full py-4 rounded-2xl text-white font-black text-lg flex items-center justify-center gap-3"
+>
+  إضافة للطلب ({( (Number(selectedProduct.price) + selectedOptions.reduce((s,o)=>s+Number(o.price),0)) * modalQty ).toFixed(2)} ر.س)
+</button>
+    </div>
+  </div>
+)}
 
       {/* --- Floating Button --- */}
       {cartCount > 0 && !isCartOpen && (
@@ -210,13 +427,18 @@ export default function MenuContent({ categories, products, restaurant }: any) {
               {orderStep === 1 && (
                 <div className="space-y-3 pb-4">
                   {cart.map((item) => (
-                    <div key={item._id} style={{ backgroundColor: 'var(--card-bg)' }} className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <div key={item.uniqueId} style={{ backgroundColor: 'var(--card-bg)' }} className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="flex-1">
                         <h4 style={{ color: 'var(--text-main)' }} className="font-bold text-sm">{item.name_ar}</h4>
+                        {item.chosenOptions?.length > 0 && (
+  <p className="text-[10px] text-gray-400 italic">
+    إضافات: {item.chosenOptions.map((o:any) => o.name).join(', ')}
+  </p>
+)}
                         <p style={{ color: 'var(--text-sub)' }} className="text-xs">{item.price} ر.س</p>
                       </div>
                       <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-1.5 border border-gray-100">
-                        <button onClick={() => removeFromCart(item._id)} className="text-gray-400 p-1 hover:text-red-500 transition-colors"><Minus size={16}/></button>
+                        <button onClick={() => removeFromCart(item.uniqueId)} className="text-gray-400 p-1 hover:text-red-500 transition-colors"><Minus size={16}/></button>
                         <span className="font-bold text-sm min-w-[20px] text-center">{item.qty}</span>
                         <button onClick={() => addToCart(item)} style={{ color: 'var(--primary-color)' }} className="p-1 hover:scale-110 transition-transform"><Plus size={16}/></button>
                       </div>
