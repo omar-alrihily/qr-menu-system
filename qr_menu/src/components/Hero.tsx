@@ -35,7 +35,7 @@ export default function Hero() {
               <ArrowLeft className="w-6 h-6" />
             </Link>
             <Link 
-  href="https://www.flexm.pro/r/bu1" 
+  href="https://www.flexm.pro/r/m46" 
   target="_blank" 
   className="w-full sm:w-auto px-14 py-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-[2rem] font-bold text-xl hover:bg-white transition-all flex items-center justify-center gap-2"
 >
