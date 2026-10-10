@@ -3,7 +3,7 @@
 import { registerRestaurant } from "@/lib/actions/auth";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Store, Mail, Phone, Lock, CheckCircle2, Loader2, ArrowRight, ChevronLeft, Globe } from "lucide-react";
+import { Store, Mail, Phone, Lock, CheckCircle2, Loader2, ArrowRight, ChevronLeft, Globe, AlertCircle } from "lucide-react";
 
 // 1. تحديث المكون الفرعي ليدعم التغيير في القيمة
 const InputGroup = ({ label, name, type, placeholder, icon, suffix, value, onChange }: any) => (
@@ -38,6 +38,7 @@ const InputGroup = ({ label, name, type, placeholder, icon, suffix, value, onCha
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(""); // ⬅️ حالة جديدة لتخزين رسالة الخطأ أو البيانات الناقصة
   
   // حالة كلمة المرور والشروط
   const [password, setPassword] = useState("");
@@ -60,21 +61,37 @@ export default function RegisterPage() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); // منع التحديث الافتراضي للصفحة
-    
-    if (!isPasswordValid) return;
+    setErrorMsg(""); // إعادة تعيين رسالة الخطأ عند كل محاولة إرسال
+
+    if (!isPasswordValid) {
+      setErrorMsg("يرجى استيفاء شروط كلمة المرور المطلوبة");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+
+    // التحقق البرمجي السريع من الحقول الأساسية إذا لزم الأمر
+    const name = formData.get("name")?.toString().trim();
+    const email = formData.get("email")?.toString().trim();
+    const slug = formData.get("slug")?.toString().trim();
+    const whatsapp = formData.get("whatsapp")?.toString().trim();
+
+    if (!name || !email || !slug || !whatsapp || !password) {
+      setErrorMsg("الرجاء تعبئة جميع الحقول المطلوبة بشكل صحيح.");
+      return;
+    }
 
     setLoading(true);
-    const formData = new FormData(event.currentTarget);
     
     try {
       const res = await registerRestaurant(formData);
       if (res?.success) {
         setSuccess(true);
       } else {
-        alert(res?.error || "حدث خطأ أثناء التسجيل");
+        setErrorMsg(res?.error || "حدث خطأ أثناء التسجيل");
       }
     } catch (error) {
-      alert("عذراً، حدث خطأ في الاتصال");
+      setErrorMsg("عذراً، حدث خطأ في الاتصال");
     } finally {
       setLoading(false);
     }
@@ -101,10 +118,19 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-[#f8fafc] flex flex-col justify-center py-8 px-4 relative overflow-hidden" dir="rtl">
       <div className="w-full max-w-3xl mx-auto relative z-10">
          <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-600 transition-all mb-8 group text-sm font-bold bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100">
-                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  العودة للرئيسية
-                </Link>
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                العودة للرئيسية
+              </Link>
         <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2.5rem] p-6 md:p-12 shadow-2xl">
+          
+          {/* ⬅️ عرض تنبيه الخطأ إذا وجد */}
+          {errorMsg && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl flex items-center gap-3 text-sm font-bold animate-fadeIn">
+              <AlertCircle size={20} className="shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="اسم المنشأة" name="name" type="text" placeholder="مطعم السعادة" icon={<Store size={20} />} />
@@ -132,24 +158,23 @@ export default function RegisterPage() {
               </div>
             </div>
 
-
             {/* حقل Honeypot لحماية الموقع من البوتات - مخفي تماماً */}
-          <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
-             <input 
-               type="text" 
-               name="confirm_restaurant_email_field" 
-               tabIndex={-1} 
-             autoComplete="off" 
-                          />
+            <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
+               <input 
+                 type="text" 
+                 name="confirm_restaurant_email_field" 
+                 tabIndex={-1} 
+               autoComplete="off" 
+                             />
                 </div>
 
             <button
-  type="submit"
-  disabled={loading || !isPasswordValid}
-  className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-all mt-4"
->
-  {loading ? <Loader2 className="animate-spin" size={22} /> : "إنشاء الحساب"}
-</button>
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center items-center gap-3 py-4.5 rounded-[1.25rem] text-lg font-black text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 transition-all mt-4"
+            >
+              {loading ? <Loader2 className="animate-spin" size={22} /> : "إنشاء الحساب"}
+            </button>
           </form>
         </div>
       </div>

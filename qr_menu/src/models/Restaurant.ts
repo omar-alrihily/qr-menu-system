@@ -41,6 +41,13 @@ resetPasswordExpires: { type: Date },
   },
   trialEndsAt: { type: Date },
   subscriptionEndsAt: { type: Date },
+
+  // أضف هذا الحقل داخل RestaurantSchema
+template_style: { 
+  type: String, 
+  enum: ['modern', 'classic', 'cafe'], 
+  default: 'modern' 
+},
   
   // حقل إضافي مفيد للتحكم اليدوي السريع
   isBlocked: { type: Boolean, default: false },

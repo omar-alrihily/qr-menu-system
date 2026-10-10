@@ -29,6 +29,8 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
   // التعديل 1: تغيير القيمة الافتراضية لتكون false (مخفية)
   const [showCover, setShowCover] = useState(restaurant?.show_cover === true);
 
+  const [selectedTemplate, setSelectedTemplate] = useState(restaurant?.template_style || "modern");
+
   useEffect(() => {
     if (restaurant) {
       // التعديل 2: التأكد من قراءة القيمة من الداتابيز وإلا تكون false
@@ -170,6 +172,91 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
           </div>
         </div>
 
+
+
+        {/* 2. قسم اختيار قوالب المنيو */}
+<div className="p-6 border border-gray-100 rounded-[2rem] bg-gray-50/30 space-y-4">
+  <div className="flex justify-between items-center">
+    <div>
+      <h3 className="font-bold text-gray-800">شكل وقالب المنيو</h3>
+      <p className="text-xs text-gray-500 mt-0.5">اختر القالب الأنسب لهوية مطعمك</p>
+    </div>
+  </div>
+
+  {/* حقل خفي لتمرير القالب المختار إلى الـ Action */}
+  <input type="hidden" name="template_style" value={selectedTemplate} />
+
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+    {[
+      {
+        id: "modern",
+        title: "العصري (Modern)",
+        desc: "تصميم أنيق وبسيط، مناسب لجميع أنواع المطاعم والمقاهي",
+        badge: "الافتراضي",
+        previewBg: "bg-gradient-to-br from-orange-50 to-orange-100/50",
+        accent: "bg-orange-500",
+      },
+      {
+        id: "classic",
+        title: "الكلاسيكي / الفاخر (Classic)",
+        desc: "طابع داكن وفخم، مثالي للمطاعم الراقية والستيك هاوس",
+        badge: "فاخر",
+        previewBg: "bg-gradient-to-br from-slate-900 to-slate-800 text-white",
+        accent: "bg-amber-400",
+      },
+      {
+        id: "cafe",
+        title: "المقهى والحلويات (Cafe)",
+        desc: "تصميم دافئ ومريح، بتركيز بصري جذاب على المشروبات والأطباق",
+        badge: "مقهى",
+        previewBg: "bg-gradient-to-br from-amber-50 to-stone-100",
+        accent: "bg-emerald-500",
+      },
+    ].map((tmpl) => {
+      const isSelected = selectedTemplate === tmpl.id;
+      return (
+        <div
+          key={tmpl.id}
+          onClick={() => setSelectedTemplate(tmpl.id)}
+          className={`relative cursor-pointer rounded-2xl p-4 border-2 transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md ${
+            isSelected
+              ? "border-orange-500 bg-white ring-2 ring-orange-500/20"
+              : "border-gray-200 bg-white hover:border-gray-300"
+          }`}
+        >
+          {/* شارة التحديد */}
+          {isSelected && (
+            <div className="absolute top-3 left-3 bg-orange-500 text-white rounded-full p-1 shadow-md">
+              <CheckCircle2 size={16} />
+            </div>
+          )}
+
+          {/* معاينة مصغرة لشكل القالب */}
+          <div className={`w-full h-20 rounded-xl mb-3 ${tmpl.previewBg} p-2.5 flex flex-col justify-between border border-black/5`}>
+            <div className="flex justify-between items-center">
+              <div className={`w-6 h-6 rounded-lg ${tmpl.accent} opacity-80`} />
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-black/10">
+                {tmpl.badge}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <div className="w-2/3 h-2 rounded bg-black/20" />
+              <div className="w-1/2 h-1.5 rounded bg-black/10" />
+            </div>
+          </div>
+
+          {/* تفاصيل القالب */}
+          <div>
+            <h4 className="font-bold text-sm text-gray-800 mb-1">{tmpl.title}</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed">{tmpl.desc}</p>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
         {/* الألوان */}
         <div className="p-6 border border-gray-100 rounded-[2rem] bg-gray-50/30 space-y-6">
           <div className="flex justify-between items-center">
@@ -182,9 +269,9 @@ export default function SettingsForm({ restaurant, subStatus }: { restaurant: an
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
-              { name: "primary_color", label: "الأساسي" },
+              { name: "primary_color", label: "السعر والسلة" },
               { name: "bg_color", label: "الخلفية" },
-              { name: "card_bg_color", label: "البطاقات" },
+              { name: "card_bg_color", label: "خلفية اللوقو والبطاقات" },
               { name: "text_primary_color", label: "العناوين" },
               { name: "text_secondary_color", label: "الوصف" },
             ].map((color) => (

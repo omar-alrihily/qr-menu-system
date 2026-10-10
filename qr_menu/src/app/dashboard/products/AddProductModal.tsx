@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { createProduct } from "@/lib/actions/product";
 
@@ -35,14 +36,14 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
     <>
       <button 
         onClick={() => setIsOpen(true)} 
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors cursor-pointer font-bold text-sm"
       >
         + إضافة منتج جديد
       </button>
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" dir="rtl">
-          <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-xl overflow-y-auto max-h-[90vh]">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full shadow-xl overflow-y-auto max-h-[90vh]">
             <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-4">إضافة منتج جديد للمنيو</h2>
             
             <form action={async (fd) => { 
@@ -53,19 +54,20 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                   const res = await createProduct(fd);
                   if(res?.success) {
                     setIsOpen(false);
-                    setOptions([]); // تصغير القائمة بعد النجاح
+                    setOptions([]); // تصفير القائمة بعد النجاح
                   } else {
                     alert(res?.error || "حدث خطأ ما");
                   }
                 } finally {
                   setLoading(false);
                 }
-              }} className="grid grid-cols-2 gap-4">
+              }} className="grid grid-cols-2 gap-4"
+            >
               
-              {/* الحقول الأساسية السابقة تبقى كما هي */}
+              {/* اختيار القسم */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">القسم الرئيسي</label>
-                <select name="category_id" required className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+                <select name="category_id" required className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-green-500 bg-white">
                   <option value="">اختر القسم...</option>
                   {categories.map(cat => (
                     <option key={cat._id} value={cat._id}>{cat.name_ar}</option>
@@ -73,56 +75,72 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 </select>
               </div>
 
+              {/* اسم المنتج */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">اسم المنتج</label>
-                <input name="name_ar" placeholder="مثلاً: كبسة دجاج" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" required />
+                <input name="name_ar" placeholder="مثلاً: لاتيه دافئ أو كيكة العسل" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
               </div>
 
-              
+              {/* وصف المنتج */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">وصف المنتج</label>
                 <textarea 
                   name="description_ar" 
-                  placeholder="اكتب وصفاً مختصراً للمكونات أو طريقة التحضير..." 
-                  rows={3}
-                  className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 resize-none"
+                  placeholder="اكتب وصفاً مختصراً للمكونات..." 
+                  rows={2}
+                  className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none resize-none text-sm"
                 />
               </div>
 
+              {/* السعر الأساسي */}
               <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">السعر الأساسي</label>
-                <input name="price" type="number" step="0.01" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" required />
+                <label className="block text-sm font-medium text-gray-700 mb-1">السعر الأساسي (ر.س)</label>
+                <input name="price" type="number" step="0.01" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
               </div>
 
+              {/* السعرات */}
               <div className="col-span-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">السعرات</label>
-                <input name="calories" type="number" className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">السعرات (اختياري)</label>
+                <input name="calories" type="number" placeholder="مثلاً: 180" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
               </div>
 
-              {/* قسم الإضافات الاختيارية الجديد */}
+              {/* ترتيب الظهور (الحقل الجديد) */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">ترتيب الظهور (اختياري)</label>
+                <input name="sort_order" type="number" placeholder="مثلاً: 1, 2, 3..." className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
+              </div>
+
+              {/* حقل رفع صورة المنتج */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">صورة المنتج (اتركها فارغة للإبقاء على الحالية)</label>
+                <input name="image" type="file" accept="image/*" className="w-full p-2 border rounded-lg text-sm cursor-pointer bg-white" />
+              </div>
+
+              {/* قسم الإضافات الاختيارية */}
               <div className="col-span-2 border-t pt-4 mt-2">
                 <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-bold text-gray-700">الإضافات الاختيارية (مثل: جبنة، حجم كبير)</label>
+                  <label className="block text-sm font-bold text-gray-700">الإضافات والنكهات الاختيارية</label>
                   <button 
                     type="button" 
                     onClick={addOption}
-                    className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full hover:bg-blue-100 transition-colors"
+                    className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors"
                   >
                     + إضافة حقل
                   </button>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
                   {options.map((opt, index) => (
-                    <div key={index} className="flex gap-2 items-center animate-in fade-in duration-300">
+                    <div key={index} className="flex gap-2 items-center">
                       <input 
-                        placeholder="اسم الإضافة" 
+                        placeholder="اسم الإضافة (مثلاً: حليب لوز)" 
                         value={opt.name}
                         onChange={(e) => updateOption(index, "name", e.target.value)}
                         className="flex-1 p-2 border rounded-lg text-sm focus:border-blue-400 outline-none"
                       />
                       <input 
                         type="number" 
+                        step="0.01"
                         placeholder="السعر" 
                         value={opt.price || ""}
                         onChange={(e) => updateOption(index, "price", e.target.value)}
@@ -131,7 +149,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                       <button 
                         type="button" 
                         onClick={() => removeOption(index)}
-                        className="text-red-400 hover:text-red-600 p-1"
+                        className="text-red-400 hover:text-red-600 p-1 font-bold text-base"
                       >
                         ✕
                       </button>
@@ -143,19 +161,19 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 </div>
               </div>
 
-              {/* باقي الحقول (الصورة، مسببات الحساسية، الترتيب) كما كانت في الكود الأصلي */}
-              <div className="col-span-2 flex gap-3 mt-6">
+              {/* أزرار الحفظ والإلغاء */}
+              <div className="col-span-2 flex gap-3 mt-6 border-t pt-4">
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className={`flex-1 text-white py-2.5 rounded-lg font-bold transition-all ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 cursor-pointer'}`}
+                  className={`flex-1 text-white py-2.5 rounded-xl font-bold text-sm transition-all ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 cursor-pointer'}`}
                 >
                   {loading ? "جاري الحفظ..." : "حفظ المنتج"}
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setIsOpen(false)} 
-                  className="flex-1 bg-gray-100 text-gray-600 py-2.5 rounded-lg hover:bg-gray-200 transition-all cursor-pointer"
+                  className="flex-1 bg-gray-100 text-gray-600 py-2.5 rounded-xl hover:bg-gray-200 transition-all cursor-pointer font-bold text-sm"
                 >
                   إلغاء
                 </button>

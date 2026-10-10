@@ -17,13 +17,17 @@ export default async function ProductsPage() {
   await dbConnect();
 
   try {
-    const productsData = await Product.find({ restaurant_id: session.user.id })
-      .populate({ path: 'category_id', model: Category })
+    // جلب الأقسام مرتبة تصاعدياً حسب sort_order الخاص بها
+    const categoriesData = await Category.find({ restaurant_id: session.user.id })
       .sort({ sort_order: 1 })
       .lean();
-    
-    const categoriesData = await Category.find({ restaurant_id: session.user.id }).lean();
 
+    // جلب المنتجات مع فرزها أولاً حسب القسم ثم حسب sort_order داخل القسم لمنع تداخلها
+    const productsData = await Product.find({ restaurant_id: session.user.id })
+      .populate({ path: 'category_id', model: Category })
+      .sort({ category_id: 1, sort_order: 1 })
+      .lean();
+    
     const products = JSON.parse(JSON.stringify(productsData));
     const categories = JSON.parse(JSON.stringify(categoriesData));
 
@@ -37,11 +41,11 @@ export default async function ProductsPage() {
     };
 
     return (
-      <div className="p-6" dir="rtl">
+      <div className="p-6 font-[tajawal]" dir="rtl">
         <div className="flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
            <div>
              <h1 className="text-2xl font-bold text-gray-800">المنتجات ({products.length})</h1>
-             <p className="text-gray-500 text-sm">إدارة قائمة الطعام وتفاصيلها</p>
+             <p className="text-gray-500 text-sm">إدارة قائمة الطعام وتفاصيلها وترتيب ظهورها</p>
            </div>
            <AddProductModal categories={categories} />
         </div>
@@ -77,9 +81,14 @@ export default async function ProductsPage() {
                   </span>
                 </div>
                 
-                <p className="text-[10px] text-blue-600 bg-blue-50 w-fit px-2 py-0.5 rounded-md mb-3 font-medium">
-                  {product.category_id?.name_ar || "بدون قسم"}
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md font-medium">
+                    {product.category_id?.name_ar || "بدون قسم"}
+                  </span>
+                  <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">
+                    الترتيب: {product.sort_order || 0}
+                  </span>
+                </div>
 
                 {/* عرض مسببات الحساسية بشكل مبسط */}
                 {product.allergens && product.allergens.length > 0 && (
@@ -113,7 +122,7 @@ export default async function ProductsPage() {
         {products.length === 0 && (
           <div className="text-center py-20 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Image src="/empty-cart.png" alt="Empty" width={32} height={32} className="opacity-20" />
+              <span className="text-2xl">☕</span>
             </div>
             <p className="text-gray-400 font-medium">قائمة الطعام فارغة، ابدأ بإضافة نكهاتك الخاصة!</p>
           </div>
@@ -121,6 +130,6 @@ export default async function ProductsPage() {
       </div>
     );
   } catch (error) {
-    return <div className="p-10 text-red-500 text-center font-bold">⚠️ خطأ في الاتصال بقاعدة البيانات</div>;
+    return <div className="p-10 text-red-500 text-center font-bold font-[tajawal]">⚠️ خطأ في الاتصال بقاعدة البيانات</div>;
   }
 }

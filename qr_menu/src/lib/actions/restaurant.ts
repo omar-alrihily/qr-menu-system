@@ -57,6 +57,8 @@ export async function updateRestaurantSettings(formData: FormData) {
     // بما أن الـ Input يرسل نصاً "true" أو "false"، نحوله إلى Boolean
     const show_cover = formData.get("show_cover") === "true";
 
+    const template_style = formData.get("template_style") as string || "modern";
+
     // 4. استخراج كافة الألوان من الـ FormData
     const primary_color = formData.get("primary_color") as string;
     const bg_color = formData.get("bg_color") as string;
@@ -79,11 +81,12 @@ export async function updateRestaurantSettings(formData: FormData) {
       card_bg_color: card_bg_color,
       text_primary_color: text_primary_color,
       text_secondary_color: text_secondary_color,
+      template_style: template_style, // حفظ نمط القالب الجديد
     });
 
-    // إعادة التحقق من الكاش لتحديث البيانات فوراً
-    revalidatePath("/dashboard/settings");
-    revalidatePath(`/r/${slug}`); 
+   // أضف هذا السطر لإجبار Next.js على إلغاء الكاش لصفحة المنيو عند الحفظ
+revalidatePath(`/r/${slug}`, "page");
+revalidatePath("/dashboard/settings"); 
     
     return { success: true };
   } catch (error: any) {
