@@ -42,6 +42,11 @@ export async function createProduct(formData: FormData) {
 
     const file = formData.get("image") as File;
     const imageUrl = await uploadToCloudinary(file);
+    
+    // استقبال الأحجام والإضافات
+    const sizesRaw = formData.get("sizes") as string;
+    const sizes = sizesRaw ? JSON.parse(sizesRaw) : [];
+
     const optionsRaw = formData.get("options") as string;
     const options = optionsRaw ? JSON.parse(optionsRaw) : [];
 
@@ -49,17 +54,15 @@ export async function createProduct(formData: FormData) {
       restaurant_id: session.user.id,
       category_id: formData.get("category_id"),
       name_ar: formData.get("name_ar"),
-      
       description_ar: formData.get("description_ar"),
-      
       calories: Number(formData.get("calories")) || 0,
-      allergens: formData.getAll("allergens"), // لاستقبال عدة قيم من الـ Checkboxes
+      allergens: formData.getAll("allergens"),
       price: Number(formData.get("price")),
       sort_order: Number(formData.get("sort_order")) || 0,
       image: imageUrl || "", 
       is_available: true,
-      options: options,
-      
+      sizes: sizes,     // <-- حفظ الأحجام
+      options: options, // <-- حفظ الإضافات
     });
 
     revalidatePath("/dashboard/products");
@@ -92,10 +95,12 @@ export async function updateProduct(id: string, formData: FormData) {
       imageUrl = await uploadToCloudinary(file);
     }
 
-    // --- الجزء الجديد الخاص بالخيارات ---
+    // استقبال الأحجام والإضافات المحدثة
+    const sizesRaw = formData.get("sizes") as string;
+    const sizes = sizesRaw ? JSON.parse(sizesRaw) : [];
+
     const optionsRaw = formData.get("options") as string;
     const options = optionsRaw ? JSON.parse(optionsRaw) : [];
-    // -----------------------------------
 
     await Product.findByIdAndUpdate(id, {
       category_id: formData.get("category_id"),
@@ -107,7 +112,8 @@ export async function updateProduct(id: string, formData: FormData) {
       sort_order: Number(formData.get("sort_order")) || 0,
       image: imageUrl,
       is_available: formData.get("is_available") === "true",
-      options: options, // تأكد من إضافة هذا الحقل هنا ليتم تحديثه
+      sizes: sizes,     // <-- تحديث الأحجام
+      options: options, // <-- تحديث الإضافات
     });
 
     revalidatePath("/dashboard/products");
@@ -117,6 +123,7 @@ export async function updateProduct(id: string, formData: FormData) {
     return { error: "فشل في تحديث المنتج" };
   }
 }
+
 // 3. حذف منتج
 export async function deleteProduct(id: string) {
   const session = await auth();
@@ -127,7 +134,6 @@ export async function deleteProduct(id: string) {
     const product = await Product.findOne({ _id: id, restaurant_id: session.user.id });
     if (!product) return { error: "المنتج غير موجود" };
 
-    // حذف الصورة من كلواديناري لتوفير المساحة
     if (product.image) {
       const publicId = product.image.split('/').pop()?.split('.')[0];
       if (publicId) await cloudinary.uploader.destroy(`restaurant_products/${publicId}`);

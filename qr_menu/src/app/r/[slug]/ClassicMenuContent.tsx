@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Plus, Minus, ShoppingBag, X, Truck, Store, Utensils } from "lucide-react";
+import { Plus, Minus, ShoppingBag, X, Truck, Store, Utensils, Check } from "lucide-react";
 
 export default function ClassicMenuContent({ categories, products, restaurant }: any) {
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
+  // الأحجام والإضافات المحددة داخل الـ Modal
+  const [selectedSize, setSelectedSize] = useState<any>(null);
   const [selectedOptions, setSelectedOptions] = useState<any[]>([]);
   const [modalQty, setModalQty] = useState(1);
 
@@ -31,21 +34,30 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
     localStorage.setItem(`cart_${restaurant.slug}`, JSON.stringify(cart));
   }, [cart, restaurant.slug]);
 
-  const addToCart = (product: any, chosenOptions: any[] = [], quantity: number = 1) => {
+  const openProductModal = (product: any) => {
+    setSelectedProduct(product);
+    setSelectedSize(product.sizes?.length > 0 ? product.sizes[0] : null);
+    setSelectedOptions([]);
+    setModalQty(1);
+  };
+
+  const addToCart = (product: any, chosenSize: any = null, chosenOptions: any[] = [], quantity: number = 1) => {
     setCart((prev) => {
+      const sizeName = chosenSize ? chosenSize.name : "";
       const optionIds = chosenOptions.map(o => o.name).sort().join(",");
-      const uniqueId = `${product._id}-${optionIds}`;
+      const uniqueId = `${product._id}-${sizeName}-${optionIds}`;
       const existing = prev.find((item) => item.uniqueId === uniqueId);
       
+      const basePrice = chosenSize ? Number(chosenSize.price) : Number(product.price);
       const optionsTotal = chosenOptions.reduce((sum, opt) => sum + Number(opt.price), 0);
-      const finalPrice = Number(product.price) + optionsTotal;
+      const finalPrice = basePrice + optionsTotal;
 
       if (existing) {
         return prev.map((item) => 
           item.uniqueId === uniqueId ? { ...item, qty: item.qty + quantity } : item
         );
       }
-      return [...prev, { ...product, uniqueId, chosenOptions, finalPrice, qty: quantity }];
+      return [...prev, { ...product, uniqueId, chosenSize, chosenOptions, finalPrice, qty: quantity }];
     });
   };
 
@@ -74,6 +86,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
 
   const closeModal = () => {
     setSelectedProduct(null);
+    setSelectedSize(null);
     setSelectedOptions([]);
     setModalQty(1);
   };
@@ -81,10 +94,18 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
   const cartTotal = cart.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
   const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
+  // حساب السعر الإضافي داخل المودال بناء على الحجم والإضافات
+  const basePriceInModal = selectedSize 
+    ? Number(selectedSize.price) 
+    : (selectedProduct ? Number(selectedProduct.price) : 0);
+
+  const modalUnitPrice = basePriceInModal + selectedOptions.reduce((s, o) => s + Number(o.price), 0);
+
   const sendWhatsAppOrder = () => {
     const orderText = cart.map((item) => {
+      const sizeText = item.chosenSize ? ` [الحجم: ${item.chosenSize.name}]` : "";
       const opts = item.chosenOptions?.length > 0 ? ` (إضافات: ${item.chosenOptions.map((o:any)=>o.name).join(', ')})` : "";
-      return `• *${item.name_ar}*${opts} (العدد: ${item.qty})`;
+      return `• *${item.name_ar}*${sizeText}${opts} (العدد: ${item.qty})`;
     }).join("\n");
 
     let deliveryInfo = "";
@@ -131,10 +152,17 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
               <div className="space-y-5">
                 {catProducts.map((product: any) => {
                   const productQtyInCart = cart.filter((item) => item._id === product._id).reduce((total, item) => total + item.qty, 0);
+                  const hasCustomizations = (product.sizes?.length > 0) || (product.options?.length > 0);
+
+                  const handleQuickAdd = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    hasCustomizations ? openProductModal(product) : addToCart(product);
+                  };
+
                   return (
                     <div 
                       key={product._id} 
-                      onClick={() => setSelectedProduct(product)}
+                      onClick={() => openProductModal(product)}
                       style={{ backgroundColor: 'var(--card-bg)' }}
                       className="group cursor-pointer rounded-2xl p-4 sm:p-5 border border-black/5 hover:border-[var(--primary-color)]/40 transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
                     >
@@ -156,9 +184,12 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                               {product.name_ar}
                             </h3>
                             <div className="flex-1 mx-2 border-b border-dotted border-gray-300 opacity-60 hidden sm:block" />
-                            <span style={{ color: 'var(--primary-color)' }} className="font-black text-lg whitespace-nowrap shrink-0">
-                              {product.price} <span className="text-xs font-bold">ر.س</span>
-                            </span>
+                            <div className="flex items-baseline gap-1 shrink-0">
+                              {product.sizes?.length > 0 && <span className="text-[10px] text-gray-400 font-bold">يبدأ من</span>}
+                              <span style={{ color: 'var(--primary-color)' }} className="font-black text-lg whitespace-nowrap">
+                                {product.price} <span className="text-xs font-bold">ر.س</span>
+                              </span>
+                            </div>
                           </div>
 
                           {/* وصف الطبق */}
@@ -187,10 +218,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                       {/* زر الإضافة السريع */}
                       <div className="flex justify-end pt-3 mt-3 border-t border-gray-100/60">
                         <button 
-                          onClick={(e) => { 
-                            e.stopPropagation(); 
-                            product.options?.length > 0 ? setSelectedProduct(product) : addToCart(product); 
-                          }}
+                          onClick={handleQuickAdd}
                           style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
                           className="px-4 py-1.5 rounded-xl border text-xs font-bold transition-all hover:bg-[var(--primary-color)] hover:text-white active:scale-95 flex items-center gap-1.5"
                         >
@@ -232,11 +260,37 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
               )}
               <div className="flex justify-between items-start gap-2">
                 <h2 style={{ color: 'var(--text-main)' }} className="text-xl font-black">{selectedProduct.name_ar}</h2>
-                <span style={{ color: 'var(--primary-color)' }} className="text-xl font-black shrink-0">{selectedProduct.price} ر.س</span>
+                <span style={{ color: 'var(--primary-color)' }} className="text-xl font-black shrink-0">{modalUnitPrice} ر.س</span>
               </div>
               
               {selectedProduct.description_ar && (
                 <p style={{ color: 'var(--text-sub)' }} className="text-xs leading-relaxed opacity-90">{selectedProduct.description_ar}</p>
+              )}
+
+              {/* اختيار الأحجام (يظهر فقط إذا كانت مفعلة للمنتج) */}
+              {selectedProduct.sizes?.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-gray-100">
+                  <h4 className="text-xs font-bold text-gray-600 mb-2">اختر الحجم <span className="text-red-500">*</span></h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {selectedProduct.sizes.map((s: any, idx: number) => {
+                      const isSelected = selectedSize?.name === s.name;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedSize(s)}
+                          className={`w-full flex justify-between items-center p-3 rounded-xl border text-xs transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/10 font-bold' 
+                              : 'border-gray-200'
+                          }`}
+                        >
+                          <span style={{ color: 'var(--text-main)' }}>{s.name}</span>
+                          <span style={{ color: 'var(--primary-color)' }}>{s.price} ر.س</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
 
               {/* الإضافات الاختيارية */}
@@ -246,7 +300,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                   {selectedProduct.options.map((opt: any, idx: number) => {
                     const isSelected = selectedOptions.find(o => o.name === opt.name);
                     return (
-                      <button key={idx} onClick={() => toggleOption(opt)} className={`w-full flex justify-between items-center p-3 rounded-xl border text-xs transition-all ${isSelected ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/10 font-bold' : 'border-gray-200'}`}>
+                      <button key={idx} onClick={() => toggleOption(opt)} className={`w-full flex justify-between items-center p-3 rounded-xl border text-xs transition-all cursor-pointer ${isSelected ? 'border-[var(--primary-color)] bg-[var(--primary-color)]/10 font-bold' : 'border-gray-200'}`}>
                         <span style={{ color: 'var(--text-main)' }}>{opt.name}</span>
                         <span style={{ color: 'var(--primary-color)' }}>+{opt.price} ر.س</span>
                       </button>
@@ -257,18 +311,18 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
 
               {/* عداد الكمية */}
               <div className="flex items-center justify-center gap-6 pt-4">
-                <button onClick={() => setModalQty(Math.max(1, modalQty - 1))} className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center active:scale-95"><Minus size={16}/></button>
+                <button onClick={() => setModalQty(Math.max(1, modalQty - 1))} className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center active:scale-95 cursor-pointer"><Minus size={16}/></button>
                 <span className="text-lg font-bold">{modalQty}</span>
-                <button onClick={() => setModalQty(modalQty + 1)} style={{ backgroundColor: 'var(--primary-color)' }} className="w-10 h-10 rounded-full text-white flex items-center justify-center active:scale-95"><Plus size={16}/></button>
+                <button onClick={() => setModalQty(modalQty + 1)} style={{ backgroundColor: 'var(--primary-color)' }} className="w-10 h-10 rounded-full text-white flex items-center justify-center active:scale-95 cursor-pointer"><Plus size={16}/></button>
               </div>
 
               {/* زر الإضافة النهائي */}
               <button 
-                onClick={() => { addToCart(selectedProduct, selectedOptions, modalQty); closeModal(); }}
+                onClick={() => { addToCart(selectedProduct, selectedSize, selectedOptions, modalQty); closeModal(); }}
                 style={{ backgroundColor: 'var(--primary-color)' }}
-                className="w-full py-3.5 rounded-2xl text-white font-black text-center shadow-lg text-sm transition-all hover:brightness-105 active:scale-98 mt-2"
+                className="w-full py-3.5 rounded-2xl text-white font-black text-center shadow-lg text-sm transition-all hover:brightness-105 active:scale-98 mt-2 cursor-pointer"
               >
-                إضافة للطلب ({( (Number(selectedProduct.price) + selectedOptions.reduce((s,o)=>s+Number(o.price),0)) * modalQty ).toFixed(2)} ر.س)
+                إضافة للطلب ({(modalUnitPrice * modalQty).toFixed(2)} ر.س)
               </button>
             </div>
           </div>
@@ -278,7 +332,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
       {/* Floating Cart Button */}
       {cartCount > 0 && !isCartOpen && (
         <div className="fixed bottom-8 left-0 right-0 flex justify-center px-6 z-50">
-          <button onClick={() => { setIsCartOpen(true); setOrderStep(1); }} className="w-full max-w-md bg-slate-900 text-white flex items-center justify-between p-4 rounded-2xl shadow-2xl border border-white/10 active:scale-98 transition-transform">
+          <button onClick={() => { setIsCartOpen(true); setOrderStep(1); }} className="w-full max-w-md bg-slate-900 text-white flex items-center justify-between p-4 rounded-2xl shadow-2xl border border-white/10 active:scale-98 transition-transform cursor-pointer">
             <div className="flex items-center gap-3">
               <ShoppingBag style={{ color: 'var(--primary-color)' }} size={20} />
               <span className="font-black text-base">{cartTotal.toFixed(2)} ر.س</span>
@@ -299,7 +353,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                 {orderStep === 2 && "طريقة الاستلام"}
                 {orderStep === 3 && "بيانات الطلب"}
               </h2>
-              <button onClick={() => setIsCartOpen(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500"><X size={18}/></button>
+              <button onClick={() => setIsCartOpen(false)} className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 cursor-pointer"><X size={18}/></button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 pb-4">
@@ -307,15 +361,20 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                 <div key={item.uniqueId} style={{ backgroundColor: 'var(--card-bg)' }} className="flex items-center justify-between p-3.5 rounded-2xl border border-gray-100 shadow-sm">
                   <div>
                     <h4 style={{ color: 'var(--text-main)' }} className="font-bold text-sm">{item.name_ar}</h4>
+                    {item.chosenSize && (
+                      <span className="inline-block text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md font-bold mt-1 ml-1">
+                        الحجم: {item.chosenSize.name}
+                      </span>
+                    )}
                     {item.chosenOptions?.length > 0 && (
-                      <p className="text-[10px] text-gray-400">إضافات: {item.chosenOptions.map((o:any)=>o.name).join(', ')}</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">إضافات: {item.chosenOptions.map((o:any)=>o.name).join(', ')}</p>
                     )}
                     <p style={{ color: 'var(--primary-color)' }} className="text-xs font-bold mt-0.5">{item.finalPrice} ر.س</p>
                   </div>
                   <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-100">
-                    <button onClick={() => removeFromCart(item.uniqueId)} className="p-1 text-gray-400 hover:text-red-500"><Minus size={14}/></button>
+                    <button onClick={() => removeFromCart(item.uniqueId)} className="p-1 text-gray-400 hover:text-red-500 cursor-pointer"><Minus size={14}/></button>
                     <span className="font-bold text-xs min-w-[16px] text-center">{item.qty}</span>
-                    <button onClick={() => addToCart(item)} className="p-1" style={{ color: 'var(--primary-color)' }}><Plus size={14}/></button>
+                    <button onClick={() => addToCart(item, item.chosenSize, item.chosenOptions)} className="p-1 cursor-pointer" style={{ color: 'var(--primary-color)' }}><Plus size={14}/></button>
                   </div>
                 </div>
               ))}
@@ -327,7 +386,7 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
                     { id: 'pickup', label: 'استلام من الفرع', icon: <Store size={18}/> },
                     { id: 'dine_in', label: 'أكل في المطعم', icon: <Utensils size={18}/> }
                   ].map((type) => (
-                    <button key={type.id} onClick={() => { setDeliveryType(type.id); setOrderStep(3); }} className="p-4 rounded-2xl border flex items-center gap-3 bg-white shadow-sm hover:border-[var(--primary-color)] transition-colors">
+                    <button key={type.id} onClick={() => { setDeliveryType(type.id); setOrderStep(3); }} className="p-4 rounded-2xl border flex items-center gap-3 bg-white shadow-sm hover:border-[var(--primary-color)] transition-colors cursor-pointer">
                       {type.icon}
                       <span className="font-bold text-sm">{type.label}</span>
                     </button>
@@ -353,10 +412,10 @@ export default function ClassicMenuContent({ categories, products, restaurant }:
 
             <div className="pt-4 border-t border-gray-100">
               {orderStep === 1 && (
-                <button onClick={() => setOrderStep(2)} style={{ backgroundColor: 'var(--primary-color)' }} className="w-full py-3.5 rounded-xl text-white font-bold text-sm">استكمال الطلب</button>
+                <button onClick={() => setOrderStep(2)} disabled={cart.length === 0} style={{ backgroundColor: 'var(--primary-color)' }} className="w-full py-3.5 rounded-xl text-white font-bold text-sm disabled:opacity-40 cursor-pointer">استكمال الطلب</button>
               )}
               {orderStep === 3 && (
-                <button onClick={sendWhatsAppOrder} disabled={!customerData.name} className="w-full py-3.5 rounded-xl bg-green-600 text-white font-bold text-sm disabled:bg-gray-200 disabled:text-gray-400">تأكيد وإرسال واتساب</button>
+                <button onClick={sendWhatsAppOrder} disabled={!customerData.name} className="w-full py-3.5 rounded-xl bg-green-600 text-white font-bold text-sm disabled:bg-gray-200 disabled:text-gray-400 cursor-pointer">تأكيد وإرسال واتساب</button>
               )}
             </div>
           </div>

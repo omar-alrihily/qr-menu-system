@@ -3,28 +3,26 @@
 import { useState } from "react";
 import { createProduct } from "@/lib/actions/product";
 
-const ALLERGENS_OPTIONS = [
-  { id: 'nuts', label: 'مكسرات' },
-  { id: 'eggs', label: 'بيض' },
-  { id: 'milk', label: 'ألبان' },
-  { id: 'gluten', label: 'جلوتين' },
-  { id: 'seafood', label: 'مأكولات بحرية' },
-  { id: 'soy', label: 'صويا' },
-];
-
 export default function AddProductModal({ categories }: { categories: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // الحالة الخاصة بالإضافات الاختيارية
+  // مفتاح تفعيل/تعطيل ميزة الأحجام
+  const [hasSizes, setHasSizes] = useState(false);
+  const [sizes, setSizes] = useState<{ name: string; price: number }[]>([]);
   const [options, setOptions] = useState<{ name: string; price: number }[]>([]);
 
-  const addOption = () => setOptions([...options, { name: "", price: 0 }]);
-  
-  const removeOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
+  const addSize = () => setSizes([...sizes, { name: "", price: 0 }]);
+  const removeSize = (index: number) => setSizes(sizes.filter((_, i) => i !== index));
+  const updateSize = (index: number, field: "name" | "price", value: string | number) => {
+    const newSizes = [...sizes];
+    if (field === "name") newSizes[index].name = value as string;
+    if (field === "price") newSizes[index].price = Number(value);
+    setSizes(newSizes);
   };
 
+  const addOption = () => setOptions([...options, { name: "", price: 0 }]);
+  const removeOption = (index: number) => setOptions(options.filter((_, i) => i !== index));
   const updateOption = (index: number, field: "name" | "price", value: string | number) => {
     const newOptions = [...options];
     if (field === "name") newOptions[index].name = value as string;
@@ -48,20 +46,23 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
             
             <form action={async (fd) => { 
                 setLoading(true);
-                // إضافة المصفوفة كـ JSON مخفي ليتم استقبالها في السيرفر أكشن
+                // إذا لم تكن مفعلة، نرسل مصفوفة فارغة للأحجام
+                fd.append("sizes", JSON.stringify(hasSizes ? sizes : []));
                 fd.append("options", JSON.stringify(options));
                 try {
                   const res = await createProduct(fd);
                   if(res?.success) {
                     setIsOpen(false);
-                    setOptions([]); // تصفير القائمة بعد النجاح
+                    setHasSizes(false);
+                    setSizes([]);
+                    setOptions([]);
                   } else {
                     alert(res?.error || "حدث خطأ ما");
                   }
                 } finally {
                   setLoading(false);
                 }
-              }} className="grid grid-cols-2 gap-4"
+              }} className="grid grid-cols-2 gap-4 text-right"
             >
               
               {/* اختيار القسم */}
@@ -78,7 +79,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
               {/* اسم المنتج */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">اسم المنتج</label>
-                <input name="name_ar" placeholder="مثلاً: لاتيه دافئ أو كيكة العسل" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
+                <input name="name_ar" placeholder="مثلاً: كابتشينو" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" required />
               </div>
 
               {/* وصف المنتج */}
@@ -86,7 +87,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">وصف المنتج</label>
                 <textarea 
                   name="description_ar" 
-                  placeholder="اكتب وصفاً مختصراً للمكونات..." 
+                  placeholder="اكتب وصفاً مختصراً..." 
                   rows={2}
                   className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none resize-none text-sm"
                 />
@@ -104,16 +105,78 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                 <input name="calories" type="number" placeholder="مثلاً: 180" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
               </div>
 
-              {/* ترتيب الظهور (الحقل الجديد) */}
+              {/* ترتيب الظهور */}
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">ترتيب الظهور (اختياري)</label>
                 <input name="sort_order" type="number" placeholder="مثلاً: 1, 2, 3..." className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none" />
               </div>
 
-              {/* حقل رفع صورة المنتج */}
+              {/* صورة المنتج */}
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">صورة المنتج (اتركها فارغة للإبقاء على الحالية)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">صورة المنتج</label>
                 <input name="image" type="file" accept="image/*" className="w-full p-2 border rounded-lg text-sm cursor-pointer bg-white" />
+              </div>
+
+              {/* خيار تفعيل/تعطيل ميزة الأحجام */}
+              <div className="col-span-2 bg-purple-50/50 p-4 rounded-xl border border-purple-100 mt-2">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <span className="block font-bold text-sm text-purple-900">تفعيل خيارات الأحجام (صغير/وسط/كبير)</span>
+                    <span className="block text-xs text-gray-500">اجعل للمنتج أحجاماً بأسعار مختلفة</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={hasSizes} 
+                      onChange={(e) => setHasSizes(e.target.checked)} 
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  </label>
+                </div>
+
+                {hasSizes && (
+                  <div className="space-y-2 mt-3 pt-3 border-t border-purple-200">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-bold text-gray-700">قائمة الأحجام:</span>
+                      <button 
+                        type="button" 
+                        onClick={addSize}
+                        className="text-xs bg-purple-600 text-white px-2.5 py-1 rounded-md font-bold hover:bg-purple-700 transition-colors"
+                      >
+                        + إضافة حجم
+                      </button>
+                    </div>
+                    {sizes.map((s, index) => (
+                      <div key={index} className="flex gap-2 items-center">
+                        <input 
+                          placeholder="اسم الحجم (مثلاً: كبير)" 
+                          value={s.name}
+                          onChange={(e) => updateSize(index, "name", e.target.value)}
+                          className="flex-1 p-2 border rounded-lg text-sm bg-white outline-none"
+                        />
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          placeholder="السعر" 
+                          value={s.price || ""}
+                          onChange={(e) => updateSize(index, "price", e.target.value)}
+                          className="w-24 p-2 border rounded-lg text-sm bg-white outline-none"
+                        />
+                        <button 
+                          type="button" 
+                          onClick={() => removeSize(index)}
+                          className="text-red-400 hover:text-red-600 p-1 font-bold"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    {sizes.length === 0 && (
+                      <p className="text-xs text-purple-400 text-center py-1">اضغط على زر إضافة حجم لبدء إدخال الأحجام</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* قسم الإضافات الاختيارية */}
@@ -125,11 +188,11 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                     onClick={addOption}
                     className="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors"
                   >
-                    + إضافة حقل
+                    + إضافة خيار
                   </button>
                 </div>
 
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                   {options.map((opt, index) => (
                     <div key={index} className="flex gap-2 items-center">
                       <input 
@@ -144,7 +207,7 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                         placeholder="السعر" 
                         value={opt.price || ""}
                         onChange={(e) => updateOption(index, "price", e.target.value)}
-                        className="w-20 p-2 border rounded-lg text-sm focus:border-blue-400 outline-none"
+                        className="w-24 p-2 border rounded-lg text-sm focus:border-blue-400 outline-none"
                       />
                       <button 
                         type="button" 
@@ -156,9 +219,18 @@ export default function AddProductModal({ categories }: { categories: any[] }) {
                     </div>
                   ))}
                   {options.length === 0 && (
-                    <p className="text-xs text-gray-400 text-center py-2 italic">لا توجد إضافات لهذا المنتج حتى الآن</p>
+                    <p className="text-xs text-gray-400 text-center py-1 italic">لا توجد إضافات لهذا المنتج</p>
                   )}
                 </div>
+              </div>
+
+              {/* حالة المنتج عند الإنشاء */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">حالة المنتج</label>
+                <select name="is_available" defaultValue="true" className="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 bg-white outline-none">
+                  <option value="true">متوفر</option>
+                  <option value="false">نفذت (غير متوفر)</option>
+                </select>
               </div>
 
               {/* أزرار الحفظ والإلغاء */}

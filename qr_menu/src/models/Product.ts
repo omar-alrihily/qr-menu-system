@@ -11,10 +11,17 @@ const ProductSchema = new Schema({
   allergens: { type: [String], default: [] }, 
   is_available: { type: Boolean, default: true },
   sort_order: { type: Number, default: 0 },
-  // الحقل الجديد للخيارات والإضافات
+  
+  // حقل الأحجام الاختياري الجديد
+  sizes: [{
+    name: { type: String, required: true }, // اسم الحجم (مثلاً: كبير)
+    price: { type: Number, required: true }  // سعر هذا الحجم
+  }],
+
+  // حقل الإضافات الاختيارية
   options: [{
-    name: { type: String, required: true }, // اسم الإضافة (مثلاً: حجم كبير)
-    price: { type: Number, default: 0 }    // سعر الإضافة
+    name: { type: String, required: true }, 
+    price: { type: Number, default: 0 }    
   }]
 }, { timestamps: true });
 
