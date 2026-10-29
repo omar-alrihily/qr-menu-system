@@ -363,7 +363,7 @@ export default function CafeMenuContent({ categories, products, restaurant }: an
                     <h4 style={{ color: "var(--text-main)" }} className="text-sm font-extrabold mb-3">
                       الإضافات <span style={{ color: "var(--text-sub)" }} className="font-medium opacity-60 text-xs">(اختياري)</span>
                     </h4>
-                    <div className="rounded-3xl border border-black/10 overflow-hidden divide-y divide-black/10 bg-white/60">
+                    <div className="rounded-3xl border border-black/10 overflow-hidden divide-y divide-black/10 bg-[var(--card-bg)]">
                       {selectedProduct.options.map((opt: any, idx: number) => {
                         const isSelected = !!selectedOptions.find(o => o.name === opt.name);
                         return (
