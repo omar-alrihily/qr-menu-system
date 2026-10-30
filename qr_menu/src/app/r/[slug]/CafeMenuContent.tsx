@@ -209,10 +209,11 @@ export default function CafeMenuContent({ categories, products, restaurant }: an
                       )}
 
                       <div className="mt-auto pt-3 flex items-center gap-3">
-                        <Price value={product.price} className="font-black text-base text-[color:var(--primary-color)]" />
-                        {product.sizes?.length > 0 && (
+                         {product.sizes?.length > 0 && (
                           <span className="text-[10px] text-gray-400 font-bold">يبدأ من</span>
                         )}
+                        <Price value={product.price} className="font-black text-base text-[color:var(--primary-color)]" />
+                       
                         {product.calories > 0 && (
                           <span style={{ color: "var(--text-sub)" }} className="text-[11px] opacity-60">
                             {product.calories} سعرة
